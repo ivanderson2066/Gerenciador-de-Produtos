@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_editar"
+        android:title="@string/editar" />
+    <item
+        android:id="@+id/menu_excluir"
+        android:title="@string/excluir" />
+    <item
+        android:id="@+id/menu_estoque_maximo"
+        android:title="@string/definir_estoque_m_ximo" />
+</menu>

@@ -1,0 +1,36 @@
+<!-- dialog_edit_stock.xml -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:background="@android:color/transparent"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/label_estoque_maximo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/digite_o_novo_estoque_m_ximo"
+            android:textSize="16sp"
+            android:textColor="@android:color/black" />
+
+        <EditText
+            android:id="@+id/input_estoque_maximo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="@string/estoque_m_ximo2"
+            android:padding="8dp"
+            android:background="@drawable/borda" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

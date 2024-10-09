@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="red">#FF0000</color> <!-- Vermelho -->
+    <color name="green">#00FF00</color> <!-- Verde -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="blaack">#000000</color>  <!-- Cor preta -->
+r</resources>

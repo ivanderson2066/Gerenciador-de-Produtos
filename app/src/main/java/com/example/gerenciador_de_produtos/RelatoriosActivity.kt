@@ -1,0 +1,153 @@
+package com.example.gerenciadordeprodutos
+
+import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.net.Uri
+import android.os.Bundle
+import android.provider.MediaStore
+import android.widget.ImageButton
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.gerenciador_de_produtos.DatabaseHelper
+import com.example.gerenciador_de_produtos.PdfHelper
+import com.example.gerenciador_de_produtos.Relatorio
+import com.example.gerenciador_de_produtos.RelatorioAdapter
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.io.OutputStream
+
+class RelatoriosActivity : AppCompatActivity() {
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: RelatorioAdapter
+    private val databaseHelper = DatabaseHelper()
+    private lateinit var pdfHelper: PdfHelper
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_relatorios)
+
+        pdfHelper = PdfHelper(this)
+
+        val buttonVoltar = findViewById<ImageButton>(R.id.button_voltar)
+        buttonVoltar.setOnClickListener { handleOnBackPressed() }
+
+        recyclerView = findViewById(R.id.relatorios_recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // Configura o FloatingActionButton para gerar o PDF
+        val fabBaixarPdf = findViewById<FloatingActionButton>(R.id.fab_baixar_pdf)
+        fabBaixarPdf.setOnClickListener {
+            exibirDialogoSelecao() // Exibir o diálogo de seleção ao clicar no botão de baixar
+        }
+
+        carregarRelatorios()
+    }
+
+    // Exibe um diálogo com checkboxes para o usuário escolher entre Entradas, Saídas ou ambos
+    private fun exibirDialogoSelecao() {
+        // Opções do diálogo
+        val opcoes = arrayOf("Entradas", "Saídas")
+        val selecionados = booleanArrayOf(false, false) // Estado inicial dos checkboxes (não selecionados)
+
+        // Exibe o diálogo
+        AlertDialog.Builder(this)
+            .setTitle("Selecione os tipos de relatório")
+            .setMultiChoiceItems(opcoes, selecionados) { _, which, isChecked ->
+                // Atualiza o estado da seleção
+                selecionados[which] = isChecked
+            }
+            .setPositiveButton("Baixar") { _, _ ->
+                // Verifica o que foi selecionado e filtra os dados
+                val tiposSelecionados = mutableListOf<String>()
+                if (selecionados[0]) tiposSelecionados.add("Entrada")
+                if (selecionados[1]) tiposSelecionados.add("Saída")
+
+                if (tiposSelecionados.isEmpty()) {
+                    Toast.makeText(this, "Por favor, selecione ao menos uma opção.", Toast.LENGTH_SHORT).show()
+                } else {
+                    baixarRelatorioFiltrado(tiposSelecionados)
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    // Filtra os relatórios de acordo com a seleção do usuário (Entrada, Saída ou Ambos) e gera o PDF
+    private fun baixarRelatorioFiltrado(tiposSelecionados: List<String>) {
+        databaseHelper.obterRelatorios { listaRelatorios ->
+            if (listaRelatorios.isNotEmpty()) {
+                // Filtra os relatórios com base nos tipos selecionados
+                val relatoriosFiltrados = listaRelatorios.filter { it.tipoOperacao in tiposSelecionados }
+
+                if (relatoriosFiltrados.isNotEmpty()) {
+                    salvarPDFNaPastaDownloads(relatoriosFiltrados) // Gera e salva o PDF com os dados filtrados
+                } else {
+                    Toast.makeText(this, "Nenhum relatório correspondente encontrado.", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Nenhum relatório disponível.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Salva o arquivo PDF na pasta Downloads usando MediaStore
+    @SuppressLint("NewApi")
+    private fun salvarPDFNaPastaDownloads(relatoriosFiltrados: List<Relatorio>) {
+        val fileName = "Relatorio_Produtos_${System.currentTimeMillis()}.pdf"
+
+        // Definir os metadados do arquivo
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName) // Nome do arquivo
+            put(MediaStore.Downloads.MIME_TYPE, "application/pdf") // Tipo MIME do PDF
+        }
+
+        // Inserir no MediaStore para a pasta Downloads
+        val resolver = contentResolver
+        val uri: Uri? = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+        // Verificar se a URI é válida e salvar o PDF
+        if (uri != null) {
+            try {
+                val outputStream: OutputStream? = resolver.openOutputStream(uri)
+                if (outputStream != null) {
+                    gerarRelatorioPDF(outputStream, relatoriosFiltrados) // Gera e salva o PDF com dados filtrados
+                    Toast.makeText(this, "PDF salvo com sucesso em Downloads!", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "Erro ao abrir OutputStream.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "Erro ao salvar o PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Erro ao criar arquivo no MediaStore.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Gera o relatório PDF e salva no OutputStream fornecido
+    private fun gerarRelatorioPDF(outputStream: OutputStream, relatoriosFiltrados: List<Relatorio>) {
+        pdfHelper.gerarRelatorioPDF(relatoriosFiltrados, outputStream)
+    }
+
+    private fun carregarRelatorios() {
+        databaseHelper.obterRelatorios { listaRelatorios ->
+            if (listaRelatorios.isNotEmpty()) {
+                // Ordenar os relatórios por horário em ordem decrescente
+                val relatoriosOrdenados = listaRelatorios.sortedByDescending { it.horario }
+
+                adapter = RelatorioAdapter(relatoriosOrdenados)
+                recyclerView.adapter = adapter
+            } else {
+                Toast.makeText(this, "Nenhuma entrada ou saída registrada.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+    private fun handleOnBackPressed() {
+        onBackPressedDispatcher.onBackPressed()
+    }
+}

@@ -1,0 +1,92 @@
+<!-- item_produto.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/borda"> <!-- Borda adicionada -->
+
+        <!-- Nome do Produto (negrito e tamanho maior) -->
+        <TextView
+            android:id="@+id/nome_produto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/nome_do_produto"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- Quantidade do Produto -->
+        <TextView
+            android:id="@+id/quantidade_produto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/quantidade_0"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- Preço do Produto -->
+        <TextView
+            android:id="@+id/preco_produto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pre_o_r_0_00"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- Categoria do Produto -->
+        <TextView
+            android:id="@+id/categoria_produto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/categoria_sem_categoria"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- Validade do Produto -->
+        <TextView
+            android:id="@+id/validade_produto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/validade_sem_validade"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- Botões de Entrada e Saída -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            style="?android:attr/buttonBarStyle"> <!-- Estilo para o layout pai -->
+
+            <Button
+                android:id="@+id/entrada_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/entrada"
+                android:textColor="@android:color/black"
+                android:backgroundTint="@color/green"
+                style="?android:attr/buttonBarButtonStyle" /> <!-- Estilo para o botão -->
+
+            <Button
+                android:id="@+id/saida_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sa_da"
+                android:textColor="@android:color/black"
+                android:backgroundTint="@color/red"
+                style="?android:attr/buttonBarButtonStyle" /> <!-- Estilo para o botão -->
+        </LinearLayout>
+    </LinearLayout>
+
+
+</FrameLayout>

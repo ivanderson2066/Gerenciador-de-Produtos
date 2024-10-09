@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "153484113221",
+    "project_id": "vicios-44d19",
+    "storage_bucket": "vicios-44d19.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153484113221:android:3b96c5665457c0b1917a2c",
+        "android_client_info": {
+          "package_name": "com.example.gerenciadordeprodutos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "153484113221-m1r88e1j11e9un8m9fv15ke5eu2dd5ve.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAICueREEBBqKjs842lsJND8ASzZVrT2Ks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "153484113221-m1r88e1j11e9un8m9fv15ke5eu2dd5ve.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

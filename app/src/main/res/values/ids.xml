@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tipo_operacao" type="id" />
+    <item name="quantidade" type="id" />
+    <item name="horario" type="id" />
+    <item name="motivo" type="id" />
+    <item name="nome_produto" type="id" />
+    <item name="quantidade_produto" type="id" />
+    <item name="preco_produto" type="id" />
+    <item name="validade_produto" type="id" />
+    <item name="categoria_produto" type="id" />
+    <item name="entrada_button" type="id" />
+    <item name="saida_button" type="id" />
+    <item name="relatorios_title" type="id" />
+    <item name="relatorios_recycler_view" type="id" />
+    <item name="produtos_title" type="id" />
+    <item name="fab_baixar_pdf" type="id" />
+    <item name="input_nome" type="id" />
+    <item name="input_validade" type="id" />
+    <item name="input_estoque_maximo" type="id" />
+    <item name="label_estoque_maximo" type="id" />
+    <item name="recyclerViewProdutos" type="id" />
+    <item name="searchView" type="id" />
+    <item name="recyclerViewCategorias" type="id" />
+</resources>

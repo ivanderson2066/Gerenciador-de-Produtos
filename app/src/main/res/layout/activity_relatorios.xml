@@ -1,0 +1,62 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="10dp">
+
+    <!-- Linha com botão de voltar e título centralizado (fixo no topo) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="16dp">
+
+        <ImageButton
+            android:id="@+id/button_voltar"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="@string/volta_tela_cadastror"
+            android:scaleType="centerInside"
+            android:src="@drawable/b" /> <!-- Ícone de voltar -->
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/relatorios_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/relat_rios_de_entradas_e_sa_das"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- RecyclerView ocupa o restante da tela -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/relatorios_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:layout_marginTop="60dp" /> <!-- Reduzi o espaço do marginTop -->
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_baixar_pdf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/baixar_relatorio"
+        app:srcCompat="@drawable/ic_download"
+        app:fabSize="normal" />
+
+</FrameLayout>

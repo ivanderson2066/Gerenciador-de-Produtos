@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permissão para acessar a internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Permissão para verificar o estado da rede -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+
+    <application
+        android:name="com.example.gerenciador_de_produtos.MyApp"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.GerenciadorDeProdutos"
+        tools:targetApi="31">
+
+        <!-- Firebase e Google Sign-In -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <!-- Declaração da LoginActivity como a atividade inicial -->
+        <activity
+            android:name="com.example.gerenciador_de_produtos.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Declaração da MainActivity -->
+        <activity
+            android:name="com.example.gerenciador_de_produtos.MainActivity"
+            android:exported="true" />
+
+        <!-- Declaração da CadastrarProdutoActivity -->
+        <activity
+            android:name="com.example.gerenciador_de_produtos.CadastrarProdutoActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.example.gerenciador_de_produtos.ProdutosActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.example.gerenciador_de_produtos.BuscaActivity"
+            android:exported="true" />
+        <activity
+            android:name=".RelatoriosActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.example.gerenciador_de_produtos.RegistroActivity"
+            android:exported="true" />
+
+
+        <!-- Adicionando o meta-data para o OAuth client ID, se necessário -->
+        <!-- <meta-data
+            android:name="com.google.android.gms.auth.api.signin.DEFAULT_WEB_CLIENT_ID"
+            android:value="@string/your_web_client_id" /> -->
+    </application>
+
+</manifest>
