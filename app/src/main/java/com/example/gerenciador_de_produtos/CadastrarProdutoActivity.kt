@@ -5,29 +5,28 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import android.view.inputmethod.EditorInfo
-import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
-import com.example.gerenciadordeprodutos.R
 import androidx.appcompat.app.AlertDialog
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
+import com.example.gerenciadordeprodutos.R
 
 class CadastrarProdutoActivity : AppCompatActivity() {
 
-    private val databaseHelper = DatabaseHelper()
+    private val databaseHelper = DatabaseHelper() // Referência para o DatabaseHelper
     private var imageUri: Uri? = null // Armazenar a URI da imagem escolhida
-    private val categorias = mutableListOf("Categoria 1", "Categoria 2", "Categoria 3") // Exemplo de categorias cadastradas
+    private val categorias = mutableListOf<String>() // Lista de categorias carregada do Firestore
 
     // Registrando o ActivityResultLauncher para escolher uma imagem
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { imageUri = it }
+        uri?.let {
+            imageUri = it
+            // Reabrir o diálogo após a seleção da imagem, para que o usuário possa continuar
+            showAdicionarCategoriaDialog()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,11 +46,11 @@ class CadastrarProdutoActivity : AppCompatActivity() {
     private fun setupCategoriaSpinner() {
         val spinnerCategoria = findViewById<Spinner>(R.id.spinner_categoria_produto)
 
-        // Adicionando a opção "Adicionar nova categoria" ao final da lista
-        val categoriasComAdicionar = categorias + "Adicionar nova categoria"
+        // Adicionando a opção "Selecione a categoria" como a primeira opção e "Adicionar nova categoria" como a última
+        val categoriasComSelecao = listOf("Selecione a categoria") + categorias + "Adicionar nova categoria"
 
         // Adapter para o Spinner
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoriasComAdicionar).apply {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoriasComSelecao).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
 
@@ -61,6 +60,13 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         spinnerCategoria.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parentView: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedCategory = parentView.getItemAtPosition(position) as String
+
+                // Ignora a seleção da opção padrão "Selecione a categoria"
+                if (selectedCategory == "Selecione a categoria") {
+                    return
+                }
+
+                // Se o usuário escolher "Adicionar nova categoria", exibe o diálogo
                 if (selectedCategory == "Adicionar nova categoria") {
                     showAdicionarCategoriaDialog()  // Exibe o diálogo de adicionar nova categoria
                 }
@@ -74,10 +80,18 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Adicionar nova categoria")
 
-        val input = TextInputEditText(this)
-        input.hint = "Digite o nome da nova categoria"
+        // Layout customizado para o diálogo com ImageView e TextInputEditText
+        val dialogLayout = layoutInflater.inflate(R.layout.dialog_adicionar_categoria, null)
+        val input = dialogLayout.findViewById<TextInputEditText>(R.id.input_nome_categoria)
+        val imageViewPreview = dialogLayout.findViewById<ImageView>(R.id.image_preview)
 
-        builder.setView(input)
+        builder.setView(dialogLayout)
+
+        // Se já houver uma imagem selecionada, mostrá-la na ImageView
+        imageUri?.let {
+            imageViewPreview.setImageURI(it)  // Mostrar a imagem previamente carregada
+            imageViewPreview.visibility = View.VISIBLE
+        }
 
         // Botão para selecionar a imagem
         builder.setNegativeButton("Selecionar imagem") { _, _ ->
@@ -90,7 +104,7 @@ class CadastrarProdutoActivity : AppCompatActivity() {
             if (nomeCategoria.isNotEmpty() && imageUri != null) {
                 // Se uma nova categoria for fornecida e a imagem for selecionada, adiciona a categoria
                 categorias.add(nomeCategoria)
-                adicionarNovaCategoria(nomeCategoria, imageUri!!)
+                adicionarNovaCategoria(nomeCategoria, imageUri!!)  // Adiciona a categoria no Firestore com imagem
             } else {
                 showToast("Nome da categoria ou imagem não selecionados!")
             }
@@ -121,7 +135,7 @@ class CadastrarProdutoActivity : AppCompatActivity() {
 
     private fun updateCategoriaAdapter() {
         val spinnerCategoria = findViewById<Spinner>(R.id.spinner_categoria_produto)
-        val categoriasComAdicionar = categorias + "Adicionar nova categoria"
+        val categoriasComAdicionar = listOf("Selecione a categoria") + categorias + "Adicionar nova categoria"
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoriasComAdicionar).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
@@ -236,5 +250,16 @@ class CadastrarProdutoActivity : AppCompatActivity() {
 
     private fun handleOnBackPressed() {
         onBackPressedDispatcher.onBackPressed()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Carregar as categorias do Firestore quando a activity for iniciada
+        databaseHelper.obterCategorias { listaCategorias ->
+            // Converte a lista de objetos Categoria para uma lista de Strings (nomes das categorias)
+            categorias.clear()
+            categorias.addAll(listaCategorias.map { it.nome }) // Aqui 'it.nome' deve ser o nome da categoria
+            updateCategoriaAdapter()  // Atualiza o Spinner com as categorias carregadas
+        }
     }
 }

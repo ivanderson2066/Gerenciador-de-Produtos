@@ -1,0 +1,22 @@
+<!-- res/layout/dialog_adicionar_categoria.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/input_nome_categoria"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Digite o nome da nova categoria" />
+
+    <ImageView
+        android:id="@+id/image_preview"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Pré-visualização da imagem"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+</LinearLayout>

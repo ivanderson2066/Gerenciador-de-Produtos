@@ -258,41 +258,53 @@ class DatabaseHelper {
             }
     }
     // Função para adicionar uma nova categoria com imagem
+    // Adiciona uma nova categoria com imagem
     fun adicionarCategoria(nomeCategoria: String, imageUri: Uri, callback: (Boolean, String?) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            callback(false, "Usuário não autenticado")
+            return
+        }
 
-        // Cria uma referência para armazenar a imagem no Firebase Storage
+        // Cria uma referência no Firebase Storage para armazenar a imagem
         val storageRef = storage.reference.child("users/$userId/categorias/${UUID.randomUUID()}.jpg")
 
-        // Faz o upload da imagem
+        // Faz o upload da imagem para o Firebase Storage
         storageRef.putFile(imageUri)
             .addOnSuccessListener {
-                // Recupera a URL da imagem após o upload
+                // Recupera a URL da imagem após o upload ser concluído
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    // Cria a categoria no Firestore com o nome e a URL da imagem
+                    // Cria os dados da categoria com a URL da imagem
                     val categoriaData = hashMapOf(
                         "nome" to nomeCategoria,
                         "imagemUrl" to uri.toString() // URL da imagem armazenada no Firebase Storage
                     )
 
-                    // Salva a categoria no Firestore
-                    db.collection("users").document(userId).collection("categorias").add(categoriaData)
+                    // Adiciona a categoria ao Firestore
+                    db.collection("users").document(userId).collection("categorias")
+                        .add(categoriaData)
                         .addOnSuccessListener {
-                            callback(true, null) // Categoria adicionada com sucesso
+                            callback(true, null) // Sucesso
                         }
                         .addOnFailureListener { e ->
-                            callback(false, e.message) // Erro ao adicionar categoria
+                            Log.w("Firestore", "Erro ao adicionar categoria: ${e.message}")
+                            callback(false, e.message) // Falha ao adicionar a categoria
                         }
                 }
             }
             .addOnFailureListener { e ->
-                callback(false, e.message) // Erro ao fazer upload da imagem
+                Log.w("FirebaseStorage", "Erro ao fazer upload da imagem: ${e.message}")
+                callback(false, e.message) // Falha no upload da imagem
             }
     }
 
     // Função para obter todas as categorias
     fun obterCategorias(callback: (List<Categoria>) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            callback(emptyList()) // Retorna lista vazia se o usuário não estiver autenticado
+            return
+        }
 
         db.collection("users").document(userId).collection("categorias")
             .get()
@@ -305,11 +317,10 @@ class DatabaseHelper {
                 callback(listaCategorias)
             }
             .addOnFailureListener { e ->
-                Log.w("Firestore", "Erro ao obter categorias", e)
-                callback(emptyList())
+                Log.w("Firestore", "Erro ao obter categorias: ${e.message}")
+                callback(emptyList()) // Retorna lista vazia em caso de erro
             }
     }
-
 
 // Buscar produtos por nome (dinâmico)
 fun obterProdutosPorNome(nome: String, callback: (List<Produto>) -> Unit) {
