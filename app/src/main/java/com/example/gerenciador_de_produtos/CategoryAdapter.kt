@@ -12,15 +12,15 @@ import com.squareup.picasso.Picasso
 
 
 class CategoryAdapter(
-    private val categorias: List<DatabaseHelper.Categoria>,
-    private val onCategoryClick: (DatabaseHelper.Categoria) -> Unit
+    private val categorias: List<Categoria>,
+    private val onCategoryClick: (Categoria) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
     inner class CategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val categoryName: TextView = itemView.findViewById(R.id.categoryName)
         private val categoryImage: ImageView = itemView.findViewById(R.id.categoryImage)
 
-        fun bind(categoria: DatabaseHelper.Categoria) {
+        fun bind(categoria: Categoria) {
             categoryName.text = categoria.nome
             // Carregar a imagem da URL (se houver)
             Picasso.get().load(categoria.imagemUrl).into(categoryImage)

@@ -15,6 +15,7 @@
 
     <!-- RecyclerView for Categories -->
     <TextView
+        android:id="@+id/textViewCategorias"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Categorias"
@@ -31,6 +32,7 @@
 
     <!-- RecyclerView for Products -->
     <TextView
+        android:id="@+id/textViewProdutos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Produtos"
