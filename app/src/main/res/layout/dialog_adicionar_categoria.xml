@@ -9,14 +9,14 @@
         android:id="@+id/input_nome_categoria"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Digite o nome da nova categoria" />
+        android:hint="@string/digite_o_nome_da_nova_categoria" />
 
     <ImageView
         android:id="@+id/image_preview"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_marginTop="16dp"
-        android:contentDescription="Pré-visualização da imagem"
+        android:contentDescription="@string/pr_visualiza_o_da_imagem"
         android:scaleType="centerCrop"
         android:visibility="gone" />
 </LinearLayout>
