@@ -122,7 +122,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:importantForAccessibility="yes"
-            android:contentDescription="Selecione uma categoria ou adicione uma nova categoria"
+            android:contentDescription="@string/selecione_uma_categoria_ou_adicione_uma_nova_categoria"
             android:hint="@string/categoria_do_produto"/>
     </com.google.android.material.textfield.TextInputLayout>
 
