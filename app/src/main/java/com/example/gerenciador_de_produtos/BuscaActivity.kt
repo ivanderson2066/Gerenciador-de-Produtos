@@ -2,6 +2,7 @@ package com.example.gerenciador_de_produtos
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,7 +44,11 @@ class BuscaActivity : AppCompatActivity() {
             carregarProdutosPorCategoria(categoria)
         }
         recyclerViewCategorias.adapter = categoriaAdapter
-
+        // Configurar o botão de voltar
+        val btnBack: ImageView = findViewById(R.id.btnBack)
+        btnBack.setOnClickListener {
+            onBackPressed() // Voltar para a tela anterior
+        }
         // Configurar RecyclerView de Produtos
         recyclerViewProdutos.layoutManager = LinearLayoutManager(this)
         produtoAdapter = ProdutoAdapter(emptyList(), this)

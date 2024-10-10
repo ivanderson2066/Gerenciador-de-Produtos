@@ -95,4 +95,5 @@
     <string name="nome_da_categoria">Nome da Categoria</string>
     <string name="categorias">Categorias</string>
     <string name="produtos2">Produtos</string>
+    <string name="voltar" />
 </resources>

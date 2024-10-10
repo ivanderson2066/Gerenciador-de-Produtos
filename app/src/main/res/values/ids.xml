@@ -26,4 +26,7 @@
     <item name="text_categoria" type="id" />
     <item name="categoryName" type="id" />
     <item name="categoryImage" type="id" />
+    <item name="btnBack" type="id" />
+    <item name="textViewCategorias" type="id" />
+    <item name="textViewProdutos" type="id" />
 </resources>
