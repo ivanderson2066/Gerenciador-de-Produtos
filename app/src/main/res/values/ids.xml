@@ -22,4 +22,6 @@
     <item name="recyclerViewProdutos" type="id" />
     <item name="searchView" type="id" />
     <item name="recyclerViewCategorias" type="id" />
+    <item name="button_adicionar_categoria" type="id" />
+    <item name="text_categoria" type="id" />
 </resources>

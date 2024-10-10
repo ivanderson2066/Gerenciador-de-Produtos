@@ -106,7 +106,7 @@
  />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Campo Categoria -->
+    <!-- Campo Categoria - Spinner -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/input_categoria_produto"
         android:layout_width="0dp"
@@ -117,16 +117,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_categoria_produto"
+        <Spinner
+            android:id="@+id/spinner_categoria_produto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/categoria_do_produto"
-            android:singleLine="true"
-            android:maxLength="25"
-            android:imeOptions="actionNext"
-       />
+            android:importantForAccessibility="yes"
+            android:contentDescription="Selecione uma categoria ou adicione uma nova categoria"
+            android:hint="@string/categoria_do_produto"/>
     </com.google.android.material.textfield.TextInputLayout>
+
 
     <!-- Campo Validade -->
     <com.google.android.material.textfield.TextInputLayout
