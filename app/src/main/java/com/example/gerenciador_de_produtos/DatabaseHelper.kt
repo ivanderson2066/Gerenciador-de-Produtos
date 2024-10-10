@@ -311,12 +311,14 @@ class DatabaseHelper {
     }
 
 
-// Buscar produtos por nome
+// Buscar produtos por nome (dinâmico)
 fun obterProdutosPorNome(nome: String, callback: (List<Produto>) -> Unit) {
     val userId = auth.currentUser?.uid ?: return
 
     db.collection("users").document(userId).collection("produtos")
-        .whereEqualTo("nome", nome)
+        .orderBy("nome")  // Ordena pelo campo 'nome' para fazer a busca por intervalo
+        .startAt(nome)  // Inicia a busca a partir da string digitada
+        .endAt(nome + "\uf8ff")  // Termina a busca usando um sufixo Unicode alto
         .get()
         .addOnSuccessListener { result ->
             val listaProdutos = mutableListOf<Produto>()
@@ -331,10 +333,7 @@ fun obterProdutosPorNome(nome: String, callback: (List<Produto>) -> Unit) {
             callback(emptyList())
         }
 }
-// Modelo da Categoria
-data class Categoria(
-    val nome: String = "",
-    val imagemUrl: String = "")
+
 }
 
 
