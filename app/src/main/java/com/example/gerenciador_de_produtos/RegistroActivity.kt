@@ -1,8 +1,11 @@
 package com.example.gerenciador_de_produtos
+import RegistroUsuario
+import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
+import android.widget.ImageButton
 import com.example.gerenciadordeprodutos.R
 
 class RegistroActivity : AppCompatActivity() {
@@ -33,6 +36,13 @@ class RegistroActivity : AppCompatActivity() {
                 senhaEditText,
                 senhaRepetidaEditText,
             )
+        }
+
+        val backButton = findViewById<ImageButton>(R.id.back_arrrowPage)
+        backButton.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish() // Opcional, fecha a tela de registro
         }
     }
 }

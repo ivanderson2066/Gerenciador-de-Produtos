@@ -71,7 +71,7 @@
     <string name="digite_seu_email_aqui">Digita seu Email</string>
     <string name="digite_sua_senha">Digita sua Senha</string>
     <string name="repita_sua_senha">Repita sua Senha</string>
-    <string name="back_arrow" />
+    <string name="back_arrow">Back_arroy </string>
     <string name="my_image_description" />
     <string name="baixar_relatorio">baixar relatorios</string>
     <string name="grafico_porc" />
@@ -88,4 +88,5 @@
     <string name="digite_o_novo_estoque_m_ximo">Digite o novo estoque máximo:</string>
     <string name="estoque_m_ximo2">Estoque máximo</string>
     <string name="_0">0%</string>
+    <string name="login_with_google_Cadastro">Login with google tela de cadastro</string>
 </resources>
