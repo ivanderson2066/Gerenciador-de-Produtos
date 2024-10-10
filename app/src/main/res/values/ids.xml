@@ -24,4 +24,6 @@
     <item name="recyclerViewCategorias" type="id" />
     <item name="button_adicionar_categoria" type="id" />
     <item name="text_categoria" type="id" />
+    <item name="categoryName" type="id" />
+    <item name="categoryImage" type="id" />
 </resources>

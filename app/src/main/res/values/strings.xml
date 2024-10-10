@@ -92,4 +92,7 @@
     <string name="digite_o_nome_da_nova_categoria">Digite o nome da nova categoria</string>
     <string name="pr_visualiza_o_da_imagem">Pré-visualização da imagem</string>
     <string name="selecione_uma_categoria_ou_adicione_uma_nova_categoria">Selecione uma categoria ou adicione uma nova categoria</string>
+    <string name="nome_da_categoria">Nome da Categoria</string>
+    <string name="categorias">Categorias</string>
+    <string name="produtos2">Produtos</string>
 </resources>

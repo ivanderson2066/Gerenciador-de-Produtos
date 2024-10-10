@@ -18,7 +18,9 @@
         android:id="@+id/textViewCategorias"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Categorias"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:text="@string/categorias"
         android:textSize="18sp"
         android:paddingTop="16dp"
         android:paddingBottom="8dp" />
@@ -35,7 +37,9 @@
         android:id="@+id/textViewProdutos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Produtos"
+        android:text="@string/produtos2"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
         android:textSize="18sp"
         android:paddingTop="16dp"
         android:paddingBottom="8dp" />

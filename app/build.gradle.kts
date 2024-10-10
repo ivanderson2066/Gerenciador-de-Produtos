@@ -50,7 +50,7 @@ dependencies {
     implementation (libs.library)
     // Firebase BoM para controle de versões centralizado
     implementation(platform(libs.firebase.bom))
-
+    implementation (libs.androidx.cardview)
     // Dependências do Firebase
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.analytics.ktx)

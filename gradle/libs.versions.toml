@@ -2,6 +2,7 @@
 agp = "8.6.0"
 androidxCoreKtx = "1.10.0"
 anychart = "1.0.0"
+cardview = "1.0.0"
 eazegraph = "1.2.5l"
 firebaseBom = "33.3.0"
 itext7CoreVersion = "7.1.15"
@@ -25,6 +26,7 @@ firebaseDatabaseKtx = "21.0.0"
 firebaseStorageKtx = "21.0.1"
 
 [libraries]
+androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 anychart = { module = "com.anychart:AnyChart", version.ref = "anychart" }
 core-ktx-v1100 = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
