@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.util.Locale
 import java.util.UUID
 
 class DatabaseHelper {
@@ -51,20 +52,27 @@ class DatabaseHelper {
     fun adicionarProduto(nome: String, quantidade: Int, preco: Double, categoria: String, validade: String?, callback: (Boolean, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return
 
-        // Verifica se já existe um produto com o mesmo nome na coleção "produtos"
+        // Nome original (como inserido pelo usuário)
+        val nomeOriginal = nome
+
+        // Nome em minúsculas para pesquisa
+        val nomeMin = nome.lowercase(Locale.getDefault())
+
+        // Verifica se já existe um produto com o nome em minúsculas
         db.collection("users").document(userId).collection("produtos")
-            .whereEqualTo("nome", nome)  // Busca pelo campo "nome"
+            .whereEqualTo("nomeMin", nomeMin)  // Busca pelo campo "nomeMin"
             .get()
             .addOnSuccessListener { result ->
                 if (!result.isEmpty) {
-                    // Se o produto já existe, retorna um erro no callback
+                    // Se o produto já existe, retorna um erro
                     callback(false, "Produto com este nome já existe.")
                 } else {
                     // Caso não exista, adiciona o novo produto
                     val produtoId = db.collection("users").document(userId).collection("produtos").document().id
                     val produtoData = hashMapOf<String, Any>(
                         "id" to produtoId,
-                        "nome" to nome,
+                        "nome" to nomeOriginal,  // Nome original (como o usuário inseriu)
+                        "nomeMin" to nomeMin,  // Nome em minúsculas para busca
                         "quantidade" to quantidade,
                         "preco" to preco,
                         "categoria" to categoria,
@@ -76,7 +84,7 @@ class DatabaseHelper {
                         .set(produtoData)
                         .addOnSuccessListener {
                             // Adiciona um registro no relatório para a entrada do produto
-                            adicionarRelatorio(nome, "Entrada", quantidade, "Produto adicionado") { sucesso ->
+                            adicionarRelatorio(nomeOriginal, "Entrada", quantidade, "Produto adicionado") { sucesso ->
                                 if (sucesso) {
                                     callback(true, null)  // Produto adicionado com sucesso
                                 } else {
@@ -325,11 +333,12 @@ class DatabaseHelper {
 // Buscar produtos por nome (dinâmico)
 fun obterProdutosPorNome(nome: String, callback: (List<Produto>) -> Unit) {
     val userId = auth.currentUser?.uid ?: return
+    val nomeMin = nome.lowercase(Locale.getDefault()).trim()  // Converte para minúsculas
 
     db.collection("users").document(userId).collection("produtos")
-        .orderBy("nome")  // Ordena pelo campo 'nome' para fazer a busca por intervalo
-        .startAt(nome)  // Inicia a busca a partir da string digitada
-        .endAt(nome + "\uf8ff")  // Termina a busca usando um sufixo Unicode alto
+        .orderBy("nomeMin")  // Ordena pelo campo 'nomeMin' para busca insensível a maiúsculas/minúsculas
+        .startAt(nomeMin)  // Inicia a busca a partir do nomeMin
+        .endAt(nomeMin + "\uf8ff")  // Termina com o sufixo Unicode alto
         .get()
         .addOnSuccessListener { result ->
             val listaProdutos = mutableListOf<Produto>()
