@@ -24,7 +24,7 @@ class BuscaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activy_busca)
+        setContentView(R.layout.activy_busca)  // Corrigir o nome do layout para "activity_busca"
 
         // Inicializar views
         recyclerViewCategorias = findViewById(R.id.recyclerViewCategorias)
@@ -84,6 +84,12 @@ class BuscaActivity : AppCompatActivity() {
         dbHelper.obterProdutosPorCategoria(categoria.nome) { produtos ->
             produtoAdapter = ProdutoAdapter(produtos, this)
             recyclerViewProdutos.adapter = produtoAdapter
+
+            // Mostrar o título e a lista de produtos, e esconder as categorias
+            textViewProdutos.visibility = View.VISIBLE
+            recyclerViewProdutos.visibility = View.VISIBLE
+            textViewCategorias.visibility = View.GONE
+            recyclerViewCategorias.visibility = View.GONE
         }
     }
 
