@@ -55,14 +55,26 @@ class ProdutoAdapter(
         // Verifica o limite de 75% do estoque máximo
         val limite75Porcento = produto.estoqueMaximo * 0.75
 
+// Define os limites de 70% e 50% do estoque máximo
+        val limite70Porcento = produto.estoqueMaximo * 0.70
+        val limite50Porcento = produto.estoqueMaximo * 0.50
+
 // Altera a cor do card de acordo com a quantidade
-        if (produto.quantidade <= limite75Porcento) {
-            // Acima ou igual a 75% do estoque máximo -> Cor vermelha
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.red))
-        } else {
-            // Se o estoque estiver abaixo de 75%, usa a cor padrão
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+        when {
+            produto.quantidade > limite70Porcento -> {
+                // Se a quantidade for acima de 70%, a cor é branca
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+            }
+            produto.quantidade > limite50Porcento -> {
+                // Se a quantidade for entre 50% e 70%, a cor é amarela
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.yellow))
+            }
+            else -> {
+                // Se a quantidade for abaixo de 50%, a cor é vermelha
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.red))
+            }
         }
+
 
 
         // Preenche as informações no card do produto
