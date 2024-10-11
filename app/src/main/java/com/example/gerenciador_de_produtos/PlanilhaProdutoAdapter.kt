@@ -44,7 +44,7 @@ class PlanilhaProdutoAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_produto, parent, false)
+            .inflate(R.layout.item_produto_table, parent, false)
         return ItemViewHolder(view)
     }
 
