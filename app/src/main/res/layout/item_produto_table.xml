@@ -100,7 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/entrada"
-                    android:textColor="@android:color/white"
+                    android:textColor="@android:color/black"
                     app:cornerRadius="16dp"
                     android:backgroundTint="@color/green" />
 
@@ -109,7 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/sa_da"
-                    android:textColor="@android:color/white"
+                    android:textColor="@android:color/black"
                     app:cornerRadius="16dp"
                     android:backgroundTint="@color/red"
                     android:layout_marginStart="16dp" />
