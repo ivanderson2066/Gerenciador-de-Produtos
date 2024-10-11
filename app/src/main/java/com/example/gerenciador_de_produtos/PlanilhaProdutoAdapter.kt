@@ -66,25 +66,22 @@ class PlanilhaProdutoAdapter(
             holder.validadeTextView.text = "Validade: ${produto.validade}"
         }
 
-        // Calcula os limites de estoque (70% e 50% do estoque máximo)
+        // Calcula os limites de 70% e 50% do estoque máximo
         val limite70Porcento = produto.estoqueMaximo * 0.70
         val limite50Porcento = produto.estoqueMaximo * 0.50
 
         // Altera a cor do card de acordo com a quantidade
         when {
             produto.quantidade > limite70Porcento -> {
-                // Se a quantidade for acima de 70%, a cor é branca
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.white))
             }
             produto.quantidade > limite50Porcento -> {
-                // Se a quantidade for entre 50% e 70%, a cor é amarela
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.yellow))
             }
             else -> {
-                // Se a quantidade for abaixo de 50%, a cor é vermelha
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.red))
-                // Aqui enviamos a notificação
-                enviarNotificacao(produto)
+                // Envia a notificação para estoque baixo
+                enviarNotificacaoDeEstoqueBaixo(produto)
             }
         }
 
@@ -97,7 +94,6 @@ class PlanilhaProdutoAdapter(
             onSaidaClick(produto)
         }
 
-        // Configura o clique longo para exibir o menu de opções
         holder.itemView.setOnLongClickListener { view ->
             activity.showProductOptionsMenu(produto, view)
             true
@@ -108,18 +104,41 @@ class PlanilhaProdutoAdapter(
         return listaProdutos.size
     }
 
-    private fun enviarNotificacao(produto: Produto) {
-        val notification: Notification = NotificationCompat.Builder(activity, notificationChannelId)
-            .setContentTitle("Alerta de Estoque Baixo")
-            .setContentText("O estoque do produto '${produto.nome}' está abaixo de 50%.")
-            .setSmallIcon(R.drawable.ic_notification) // Use um ícone apropriado
+    // Função para enviar a notificação de estoque baixo
+    private fun enviarNotificacaoDeEstoqueBaixo(produto: Produto) {
+        // Cria o NotificationManager
+        val notificationManager =
+            activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Cria o canal de notificação (necessário para Android 8.0 ou superiores)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "estoque_baixo_channel"
+            val channelName = "Estoque Baixo"
+            val channelDescription = "Notificações quando o estoque de um produto está baixo"
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = channelDescription
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Alteração aqui: a mensagem será alterada para refletir 75%
+        val notification = NotificationCompat.Builder(activity, "estoque_baixo_channel")
+            .setSmallIcon(R.drawable.ic_notification)  // Ícone da notificação
+            .setContentTitle("Estoque baixo")
+            .setContentText("O estoque do produto '${produto.nome}' está abaixo de 75%.") // Mudei de 50% para 75%
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
 
+        // Envia a notificação
         notificationManager.notify(produto.id.hashCode(), notification)
     }
 
+    // ViewHolder para o item do RecyclerView
     class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nomeTextView: TextView = view.findViewById(R.id.nome_produto)
         val quantidadeTextView: TextView = view.findViewById(R.id.quantidade_produto)
