@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
 import java.util.Locale
@@ -49,6 +50,20 @@ class ProdutoAdapter(
 
         holder.nomeProduto.text = produto.nome
         holder.precoProduto.text = produto.preco.toString()
+        // Verifica se a quantidade é menor ou igual a 75% do estoque máximo
+        // Calcula os limites de 75% e 50% do estoque máximo
+        // Verifica o limite de 75% do estoque máximo
+        val limite75Porcento = produto.estoqueMaximo * 0.75
+
+// Altera a cor do card de acordo com a quantidade
+        if (produto.quantidade <= limite75Porcento) {
+            // Acima ou igual a 75% do estoque máximo -> Cor vermelha
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.red))
+        } else {
+            // Se o estoque estiver abaixo de 75%, usa a cor padrão
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+        }
+
 
         // Preenche as informações no card do produto
         holder.nomeTextView.text = produto.nome

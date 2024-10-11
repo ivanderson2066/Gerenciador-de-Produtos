@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
 import java.util.Locale
@@ -40,6 +41,27 @@ class PlanilhaProdutoAdapter(
             holder.validadeTextView.text = "Validade: ${produto.validade}"
         }
 
+        // Calcula os limites de estoque (75% e 50% do estoque máximo)
+        val limite75Porcento = produto.estoqueMaximo * 0.75
+        val limite50Porcento = produto.estoqueMaximo * 0.50
+
+        // Altera a cor do card de acordo com a quantidade
+        when {
+            produto.quantidade <= limite50Porcento -> {
+                // Abaixo de 50% do estoque máximo -> Cor amarela
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.yellow))
+            }
+            produto.quantidade <= limite75Porcento -> {
+                // Abaixo de 75% do estoque máximo -> Cor vermelha
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.red))
+            }
+            else -> {
+                // Se o estoque estiver acima de 75% do máximo, usa a cor padrão
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.white))
+            }
+        }
+
+        // Configura os botões de entrada e saída
         holder.entradaButton.setOnClickListener {
             onEntradaClick(produto)
         }
@@ -48,6 +70,7 @@ class PlanilhaProdutoAdapter(
             onSaidaClick(produto)
         }
 
+        // Configura o clique longo para exibir o menu de opções
         holder.itemView.setOnLongClickListener { view ->
             activity.showProductOptionsMenu(produto, view)
             true
