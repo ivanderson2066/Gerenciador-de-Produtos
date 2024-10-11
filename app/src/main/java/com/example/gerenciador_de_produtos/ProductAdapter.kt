@@ -159,13 +159,6 @@ class ProdutoAdapter(
         return listaProdutos.size
     }
 
-    // Método para atualizar a lista de produtos
-    @SuppressLint("NotifyDataSetChanged")
-    fun atualizarLista(novaLista: List<Produto>) {
-        listaProdutos = novaLista
-        notifyDataSetChanged() // Notifica o RecyclerView que os dados foram alterados
-    }
-
     // Método para enviar a notificação de estoque baixo
     private fun enviarNotificacaoDeEstoqueBaixo(produto: Produto) {
         // Cria o NotificationManager
