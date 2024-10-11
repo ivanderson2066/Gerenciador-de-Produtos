@@ -124,21 +124,20 @@ class MainActivity : AppCompatActivity() {
             if (listaProdutos.isEmpty()) {
                 noProductsText.visibility = View.VISIBLE
                 recyclerView.visibility = View.GONE
-                pieChart.clearChart() // Limpa o gráfico se não houver produtos
-                // Resetar os índices para evitar erros ao adicionar novos produtos depois
-                progressoSliceIndex = -1
-                restanteSliceIndex = -1
+                // Exibe o gráfico zerado (0% progresso e 100% restante)
+                exibirGraficoVazio()
             } else {
                 noProductsText.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
-                adapter = ProdutoAdapter(listaProdutos, this) // Passa a referência da MainActivity
+                adapter = ProdutoAdapter(listaProdutos, this)
                 recyclerView.adapter = adapter
-                exibirGrafico(listaProdutos) // Exibe os produtos no gráfico
+                // Recalcula o gráfico com base na nova lista de produtos
+                exibirGrafico(listaProdutos)
 
                 // Configura o clique longo em cada item da lista de produtos
                 adapter.setOnItemLongClickListener(object : ProdutoAdapter.OnItemLongClickListener {
                     override fun onItemLongClick(produto: Produto) {
-                        showProductOptionsMenu(produto) // Chama o método para mostrar as opções do produto
+                        showProductOptionsMenu(produto) // Mostra o menu de opções do produto
                     }
                 })
             }
@@ -158,7 +157,7 @@ class MainActivity : AppCompatActivity() {
             val porcentagemProgresso = (quantidadeTotal.toFloat() / estoqueMaximoTotal.toFloat()) * 100
             val restante = 100 - porcentagemProgresso
 
-            // Se os índices ainda não foram configurados, ou se o gráfico foi limpo, recriar as fatias
+            // Se os índices ainda não foram configurados ou o gráfico foi limpo, recria as fatias
             if (progressoSliceIndex == -1 || restanteSliceIndex == -1) {
                 pieChart.clearChart()
                 pieChart.addPieSlice(PieModel("Restante", restante, Color.GRAY))
@@ -171,15 +170,26 @@ class MainActivity : AppCompatActivity() {
                 val textViewPercentage = findViewById<TextView>(R.id.piechart_percentage)
                 textViewPercentage.text = String.format(Locale.getDefault(), "%.0f%%", porcentagemProgresso)
             } else {
+                // Atualiza o gráfico com animação
                 animarAtualizacaoGrafico(porcentagemProgresso, restante)
             }
         } else {
-            // Se não houver produtos ou estoque total, limpar o gráfico
-            pieChart.clearChart()
-            progressoSliceIndex = -1
-            restanteSliceIndex = -1
-            Toast.makeText(this, "Nenhum produto encontrado.", Toast.LENGTH_SHORT).show()
+            // Se não houver estoque total, zera o gráfico (0% progresso e 100% restante)
+            exibirGraficoVazio()
         }
+    }
+
+    private fun exibirGraficoVazio() {
+        // Limpa o gráfico e exibe 0% progresso e 100% restante
+        pieChart.clearChart()
+        pieChart.addPieSlice(PieModel("Restante", 100f, Color.GRAY))
+        pieChart.addPieSlice(PieModel("Progresso Atual", 0f, Color.BLACK))
+
+        restanteSliceIndex = pieChart.data.size - 2
+        progressoSliceIndex = pieChart.data.size - 1
+
+        val textViewPercentage = findViewById<TextView>(R.id.piechart_percentage)
+        textViewPercentage.text = "0%"
     }
 
 
