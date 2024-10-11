@@ -29,4 +29,6 @@
     <item name="btnBack" type="id" />
     <item name="textViewCategorias" type="id" />
     <item name="textViewProdutos" type="id" />
+    <item name="gif_50" type="id" />
+    <item name="gif_75" type="id" />
 </resources>
