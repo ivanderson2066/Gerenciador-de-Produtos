@@ -187,11 +187,11 @@ class ProdutoAdapter(
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Cria a notificação
+        // Alteração aqui: a mensagem será alterada para refletir 75%
         val notification = NotificationCompat.Builder(context, "estoque_baixo_channel")
             .setSmallIcon(R.drawable.ic_notification)  // Ícone da notificação
             .setContentTitle("Estoque baixo")
-            .setContentText("O estoque do produto '${produto.nome}' está abaixo de 50%.")
+            .setContentText("O estoque do produto '${produto.nome}' está abaixo de 75%.") // Mudei de 50% para 75%
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
