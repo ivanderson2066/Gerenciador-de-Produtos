@@ -1,7 +1,8 @@
+package com.example.gerenciador_de_produtos
+
 import android.content.Context
 import android.widget.EditText
 import android.widget.Toast
-import com.example.gerenciador_de_produtos.UsuarioCadastroObj
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 

@@ -56,7 +56,7 @@
             android:name="com.example.gerenciador_de_produtos.BuscaActivity"
             android:exported="true" />
         <activity
-            android:name=".RelatoriosActivity"
+            android:name="com.example.gerenciador_de_produtos.RelatoriosActivity"
             android:exported="true" />
         <activity
             android:name="com.example.gerenciador_de_produtos.RegistroActivity"

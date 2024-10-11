@@ -5,5 +5,4 @@ data class UsuarioCadastroObj (
         val numero: Int = 0,
         val senha: String,
         val senhaRepetida: String
-    ){
-}
+    )

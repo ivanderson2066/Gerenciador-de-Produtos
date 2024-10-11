@@ -1,5 +1,4 @@
 package com.example.gerenciador_de_produtos
-import RegistroUsuario
 import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText

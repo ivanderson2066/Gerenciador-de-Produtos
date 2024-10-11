@@ -150,7 +150,7 @@ class ProdutosActivity : AppCompatActivity() {
         popup.show()
     }
 
-    fun excluirProduto(produto: Produto) {
+    private fun excluirProduto(produto: Produto) {
         AlertDialog.Builder(this)
             .setTitle("Excluir Produto")
             .setMessage("Tem certeza que deseja excluir este produto?")

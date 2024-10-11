@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.SearchView
 import android.widget.TextView
-import com.example.gerenciadordeprodutos.ProdutoAdapter
 import com.example.gerenciadordeprodutos.R
 
 class BuscaActivity : AppCompatActivity() {

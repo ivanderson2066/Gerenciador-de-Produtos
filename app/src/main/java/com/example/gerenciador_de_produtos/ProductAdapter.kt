@@ -1,4 +1,4 @@
-package com.example.gerenciadordeprodutos
+package com.example.gerenciador_de_produtos
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,8 +9,7 @@ import android.widget.Button
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gerenciador_de_produtos.MainActivity
-import com.example.gerenciador_de_produtos.Produto
+import com.example.gerenciadordeprodutos.R
 import java.util.Locale
 
 class ProdutoAdapter(
@@ -58,8 +57,13 @@ class ProdutoAdapter(
         // Formata o preço para o padrão brasileiro
         val precoFormatado = String.format(Locale("pt", "BR"), "%.2f", produto.preco).replace(".", ",")
         holder.precoTextView.text = "Preço: R$$precoFormatado"
-        holder.categoriaTextView.text = "Categoria: ${produto.categoria}"
-
+        // Verifica se a categoria é vazia ou nula
+        if (produto.categoria.isEmpty()) {
+            holder.categoriaTextView.visibility = View.GONE  // Esconde o campo de categoria
+        } else {
+            holder.categoriaTextView.visibility = View.VISIBLE  // Exibe o campo de categoria
+            holder.categoriaTextView.text = "Categoria: ${produto.categoria}"  // Define o texto da categoria
+        }
         // Exibe ou esconde o campo de validade
         if (produto.validade.isNullOrEmpty()) {
             holder.validadeTextView.visibility = View.GONE

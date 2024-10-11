@@ -211,13 +211,19 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         val categoria = spinnerCategoria.selectedItem.toString()
         val validade = findViewById<TextInputEditText>(R.id.et_validade_produto).text.toString()
 
+        // Se a categoria for "Selecione a categoria", tratamos como string vazia.
+        val categoriaFinal = if (categoria == "Selecione a categoria") "" else categoria
+
+        // Validação para a data de validade
         if (validade.isNotEmpty() && !validarDataValidade(validade)) {
             showToast("Data inválida")
             return
         }
 
         val validadeExibida = validade.ifEmpty { null }
-        databaseHelper.adicionarProduto(nome, quantidade, preco, categoria, validadeExibida) { sucesso, mensagem ->
+
+        // Passamos o valor de categoriaFinal (que pode ser string vazia) para o método adicionarProduto
+        databaseHelper.adicionarProduto(nome, quantidade, preco, categoriaFinal, validadeExibida) { sucesso, mensagem ->
             if (sucesso) {
                 showToast("Produto salvo com sucesso!")
                 setResult(RESULT_OK)

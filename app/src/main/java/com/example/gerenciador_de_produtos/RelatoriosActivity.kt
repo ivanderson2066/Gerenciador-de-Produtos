@@ -1,4 +1,4 @@
-package com.example.gerenciadordeprodutos
+package com.example.gerenciador_de_produtos
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
@@ -11,10 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gerenciador_de_produtos.DatabaseHelper
-import com.example.gerenciador_de_produtos.PdfHelper
-import com.example.gerenciador_de_produtos.Relatorio
-import com.example.gerenciador_de_produtos.RelatorioAdapter
+import com.example.gerenciadordeprodutos.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.OutputStream
 

@@ -24,9 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
-import com.example.gerenciadordeprodutos.ProdutoAdapter
 import com.example.gerenciadordeprodutos.R
-import com.example.gerenciadordeprodutos.RelatoriosActivity
 import com.google.firebase.auth.FirebaseAuth
 import org.eazegraph.lib.charts.PieChart
 import org.eazegraph.lib.models.PieModel
