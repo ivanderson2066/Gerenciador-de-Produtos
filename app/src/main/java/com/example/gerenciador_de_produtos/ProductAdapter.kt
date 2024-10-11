@@ -1,13 +1,17 @@
 package com.example.gerenciador_de_produtos
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
@@ -34,8 +38,6 @@ class ProdutoAdapter(
         val validadeTextView: TextView = itemView.findViewById(R.id.validade_produto)
         val entradaButton: Button = itemView.findViewById(R.id.entrada_button) // Botão de entrada
         val saidaButton: Button = itemView.findViewById(R.id.saida_button) // Botão de saída
-        val nomeProduto: TextView = itemView.findViewById(R.id.nome_produto)
-        val precoProduto: TextView = itemView.findViewById(R.id.preco_produto)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProdutoViewHolder {
@@ -48,18 +50,34 @@ class ProdutoAdapter(
     override fun onBindViewHolder(holder: ProdutoViewHolder, position: Int) {
         val produto = listaProdutos[position]
 
-        holder.nomeProduto.text = produto.nome
-        holder.precoProduto.text = produto.preco.toString()
-        // Verifica se a quantidade é menor ou igual a 75% do estoque máximo
-        // Calcula os limites de 75% e 50% do estoque máximo
-        // Verifica o limite de 75% do estoque máximo
-        val limite75Porcento = produto.estoqueMaximo * 0.75
+        holder.nomeTextView.text = produto.nome
+        holder.quantidadeTextView.text = "Quantidade: ${produto.quantidade}"
 
-// Define os limites de 70% e 50% do estoque máximo
+        // Formata o preço para o padrão brasileiro
+        val precoFormatado = String.format(Locale("pt", "BR"), "%.2f", produto.preco).replace(".", ",")
+        holder.precoTextView.text = "Preço: R$$precoFormatado"
+
+        // Verifica se a categoria é vazia ou nula
+        if (produto.categoria.isEmpty()) {
+            holder.categoriaTextView.visibility = View.GONE  // Esconde o campo de categoria
+        } else {
+            holder.categoriaTextView.visibility = View.VISIBLE  // Exibe o campo de categoria
+            holder.categoriaTextView.text = "Categoria: ${produto.categoria}"  // Define o texto da categoria
+        }
+
+        // Exibe ou esconde o campo de validade
+        if (produto.validade.isNullOrEmpty()) {
+            holder.validadeTextView.visibility = View.GONE
+        } else {
+            holder.validadeTextView.visibility = View.VISIBLE
+            holder.validadeTextView.text = "Validade: ${produto.validade}"
+        }
+
+        // Calcula os limites de 70% e 50% do estoque máximo
         val limite70Porcento = produto.estoqueMaximo * 0.70
         val limite50Porcento = produto.estoqueMaximo * 0.50
 
-// Altera a cor do card de acordo com a quantidade
+        // Altera a cor do card de acordo com a quantidade
         when {
             produto.quantidade > limite70Porcento -> {
                 // Se a quantidade for acima de 70%, a cor é branca
@@ -72,31 +90,10 @@ class ProdutoAdapter(
             else -> {
                 // Se a quantidade for abaixo de 50%, a cor é vermelha
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.red))
+
+                // Envia a notificação se a quantidade cair abaixo de 50%
+                enviarNotificacaoDeEstoqueBaixo(produto)
             }
-        }
-
-
-
-        // Preenche as informações no card do produto
-        holder.nomeTextView.text = produto.nome
-        holder.quantidadeTextView.text = "Quantidade: ${produto.quantidade}"
-
-        // Formata o preço para o padrão brasileiro
-        val precoFormatado = String.format(Locale("pt", "BR"), "%.2f", produto.preco).replace(".", ",")
-        holder.precoTextView.text = "Preço: R$$precoFormatado"
-        // Verifica se a categoria é vazia ou nula
-        if (produto.categoria.isEmpty()) {
-            holder.categoriaTextView.visibility = View.GONE  // Esconde o campo de categoria
-        } else {
-            holder.categoriaTextView.visibility = View.VISIBLE  // Exibe o campo de categoria
-            holder.categoriaTextView.text = "Categoria: ${produto.categoria}"  // Define o texto da categoria
-        }
-        // Exibe ou esconde o campo de validade
-        if (produto.validade.isNullOrEmpty()) {
-            holder.validadeTextView.visibility = View.GONE
-        } else {
-            holder.validadeTextView.visibility = View.VISIBLE
-            holder.validadeTextView.text = "Validade: ${produto.validade}"
         }
 
         // Configura o clique no botão de Entrada para abrir o diálogo de entrada
@@ -167,5 +164,39 @@ class ProdutoAdapter(
     fun atualizarLista(novaLista: List<Produto>) {
         listaProdutos = novaLista
         notifyDataSetChanged() // Notifica o RecyclerView que os dados foram alterados
+    }
+
+    // Método para enviar a notificação de estoque baixo
+    private fun enviarNotificacaoDeEstoqueBaixo(produto: Produto) {
+        // Cria o NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Cria o canal de notificação (necessário para Android 8.0 e superiores)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "estoque_baixo_channel"
+            val channelName = "Estoque Baixo"
+            val channelDescription = "Notificações quando o estoque de um produto está baixo"
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = channelDescription
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Cria a notificação
+        val notification = NotificationCompat.Builder(context, "estoque_baixo_channel")
+            .setSmallIcon(R.drawable.ic_notification)  // Ícone da notificação
+            .setContentTitle("Estoque baixo")
+            .setContentText("O estoque do produto '${produto.nome}' está abaixo de 50%.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        // Envia a notificação
+        notificationManager.notify(produto.id.hashCode(), notification)
     }
 }

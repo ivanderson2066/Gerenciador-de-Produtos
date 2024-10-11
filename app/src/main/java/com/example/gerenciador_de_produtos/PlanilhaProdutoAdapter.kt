@@ -1,11 +1,17 @@
 package com.example.gerenciador_de_produtos
 
 import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
@@ -17,6 +23,25 @@ class PlanilhaProdutoAdapter(
     private val onSaidaClick: (Produto) -> Unit,
     private val activity: ProdutosActivity
 ) : RecyclerView.Adapter<PlanilhaProdutoAdapter.ItemViewHolder>() {
+
+    private val notificationManager: NotificationManager =
+        activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    private val notificationChannelId = "ESTOQUE_ALERTA"
+
+    init {
+        // Criação do canal de notificação (necessário no Android 8.0+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                notificationChannelId,
+                "Alerta de Estoque",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notificações sobre estoque baixo"
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -58,6 +83,8 @@ class PlanilhaProdutoAdapter(
             else -> {
                 // Se a quantidade for abaixo de 50%, a cor é vermelha
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.red))
+                // Aqui enviamos a notificação
+                enviarNotificacao(produto)
             }
         }
 
@@ -79,6 +106,18 @@ class PlanilhaProdutoAdapter(
 
     override fun getItemCount(): Int {
         return listaProdutos.size
+    }
+
+    private fun enviarNotificacao(produto: Produto) {
+        val notification: Notification = NotificationCompat.Builder(activity, notificationChannelId)
+            .setContentTitle("Alerta de Estoque Baixo")
+            .setContentText("O estoque do produto '${produto.nome}' está abaixo de 50%.")
+            .setSmallIcon(R.drawable.ic_notification) // Use um ícone apropriado
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(produto.id.hashCode(), notification)
     }
 
     class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
