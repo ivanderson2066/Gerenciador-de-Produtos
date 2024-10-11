@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
@@ -73,28 +74,36 @@ class ProdutoAdapter(
             holder.validadeTextView.text = "Validade: ${produto.validade}"
         }
 
-        // Calcula os limites de 70% e 50% do estoque máximo
+// Calcula os limites de 70% e 50% do estoque máximo
         val limite70Porcento = produto.estoqueMaximo * 0.70
         val limite50Porcento = produto.estoqueMaximo * 0.50
 
-        // Altera a cor do card de acordo com a quantidade
+// Identifica os GIFs
+        val gif50: ImageView = holder.itemView.findViewById(R.id.gif_50)
+        val gif75: ImageView = holder.itemView.findViewById(R.id.gif_75)
+
+// Altera a visibilidade dos GIFs de acordo com a quantidade
         when {
             produto.quantidade > limite70Porcento -> {
-                // Se a quantidade for acima de 70%, a cor é branca
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+                // Se a quantidade for acima de 70%, esconder ambos os GIFs
+                gif50.visibility = View.GONE
+                gif75.visibility = View.GONE
             }
             produto.quantidade > limite50Porcento -> {
-                // Se a quantidade for entre 50% e 70%, a cor é amarela
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.yellow))
+                // Se a quantidade for entre 50% e 70%, mostrar o GIF para 50%
+                gif50.visibility = View.VISIBLE
+                gif75.visibility = View.GONE
             }
             else -> {
-                // Se a quantidade for abaixo de 50%, a cor é vermelha
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.red))
+                // Se a quantidade for abaixo de 50%, mostrar o GIF para 75%
+                gif50.visibility = View.GONE
+                gif75.visibility = View.VISIBLE
 
                 // Envia a notificação se a quantidade cair abaixo de 50%
                 enviarNotificacaoDeEstoqueBaixo(produto)
             }
         }
+
 
         // Configura o clique no botão de Entrada para abrir o diálogo de entrada
         holder.entradaButton.setOnClickListener {
