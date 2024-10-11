@@ -125,6 +125,9 @@ class MainActivity : AppCompatActivity() {
                 noProductsText.visibility = View.VISIBLE
                 recyclerView.visibility = View.GONE
                 pieChart.clearChart() // Limpa o gráfico se não houver produtos
+                // Resetar os índices para evitar erros ao adicionar novos produtos depois
+                progressoSliceIndex = -1
+                restanteSliceIndex = -1
             } else {
                 noProductsText.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
@@ -138,8 +141,44 @@ class MainActivity : AppCompatActivity() {
                         showProductOptionsMenu(produto) // Chama o método para mostrar as opções do produto
                     }
                 })
-
             }
+        }
+    }
+
+    private fun exibirGrafico(listaProdutos: List<Produto>) {
+        var quantidadeTotal = 0
+        var estoqueMaximoTotal = 0
+
+        for (produto in listaProdutos) {
+            quantidadeTotal += produto.quantidade
+            estoqueMaximoTotal += produto.estoqueMaximo
+        }
+
+        if (estoqueMaximoTotal > 0) {
+            val porcentagemProgresso = (quantidadeTotal.toFloat() / estoqueMaximoTotal.toFloat()) * 100
+            val restante = 100 - porcentagemProgresso
+
+            // Se os índices ainda não foram configurados, ou se o gráfico foi limpo, recriar as fatias
+            if (progressoSliceIndex == -1 || restanteSliceIndex == -1) {
+                pieChart.clearChart()
+                pieChart.addPieSlice(PieModel("Restante", restante, Color.GRAY))
+                restanteSliceIndex = pieChart.data.size - 1
+
+                pieChart.addPieSlice(PieModel("Progresso Atual", porcentagemProgresso, Color.BLACK))
+                progressoSliceIndex = pieChart.data.size - 1
+
+                // Atualiza o TextView com a porcentagem inicial
+                val textViewPercentage = findViewById<TextView>(R.id.piechart_percentage)
+                textViewPercentage.text = String.format(Locale.getDefault(), "%.0f%%", porcentagemProgresso)
+            } else {
+                animarAtualizacaoGrafico(porcentagemProgresso, restante)
+            }
+        } else {
+            // Se não houver produtos ou estoque total, limpar o gráfico
+            pieChart.clearChart()
+            progressoSliceIndex = -1
+            restanteSliceIndex = -1
+            Toast.makeText(this, "Nenhum produto encontrado.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -182,41 +221,6 @@ class MainActivity : AppCompatActivity() {
         animatorRestante.start()
     }
 
-    private fun exibirGrafico(listaProdutos: List<Produto>) {
-        // Calcula o estoque total atual e o estoque máximo total
-        var quantidadeTotal = 0
-        var estoqueMaximoTotal = 0
-
-        for (produto in listaProdutos) {
-            quantidadeTotal += produto.quantidade
-            estoqueMaximoTotal += produto.estoqueMaximo
-        }
-
-        // Verifica se há produtos para evitar divisão por zero
-        if (estoqueMaximoTotal > 0) {
-            // Calcula a porcentagem de progresso
-            val porcentagemProgresso = (quantidadeTotal.toFloat() / estoqueMaximoTotal.toFloat()) * 100
-            val restante = 100 - porcentagemProgresso // O restante até o estoque máximo
-
-            if (progressoSliceIndex == -1 || restanteSliceIndex == -1) {
-                // Cria as fatias e guarda os índices de progresso e restante
-                pieChart.addPieSlice(PieModel("Restante", restante, Color.GRAY))
-                restanteSliceIndex = pieChart.data.size - 1
-
-                pieChart.addPieSlice(PieModel("Progresso Atual", porcentagemProgresso, Color.BLACK))
-                progressoSliceIndex = pieChart.data.size - 1 // Último índice adicionado
-
-                // Atualiza o TextView com a porcentagem inicial
-                val textViewPercentage = findViewById<TextView>(R.id.piechart_percentage)
-                textViewPercentage.text = String.format(Locale.getDefault(), "%.0f%%", porcentagemProgresso)
-            } else {
-                // Chama a função de animação para atualizar os valores
-                animarAtualizacaoGrafico(porcentagemProgresso, restante)
-            }
-        } else {
-            Toast.makeText(this, "Nenhum produto encontrado.", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     // Método para mostrar o menu de opções do produto
     fun showProductOptionsMenu(produto: Produto) {
