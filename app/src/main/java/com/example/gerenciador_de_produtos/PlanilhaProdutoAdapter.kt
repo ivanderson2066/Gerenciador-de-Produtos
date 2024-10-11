@@ -41,23 +41,23 @@ class PlanilhaProdutoAdapter(
             holder.validadeTextView.text = "Validade: ${produto.validade}"
         }
 
-        // Calcula os limites de estoque (75% e 50% do estoque máximo)
-        val limite75Porcento = produto.estoqueMaximo * 0.75
+        // Calcula os limites de estoque (70% e 50% do estoque máximo)
+        val limite70Porcento = produto.estoqueMaximo * 0.70
         val limite50Porcento = produto.estoqueMaximo * 0.50
 
         // Altera a cor do card de acordo com a quantidade
         when {
-            produto.quantidade <= limite50Porcento -> {
-                // Abaixo de 50% do estoque máximo -> Cor amarela
+            produto.quantidade > limite70Porcento -> {
+                // Se a quantidade for acima de 70%, a cor é branca
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.white))
+            }
+            produto.quantidade > limite50Porcento -> {
+                // Se a quantidade for entre 50% e 70%, a cor é amarela
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.yellow))
             }
-            produto.quantidade <= limite75Porcento -> {
-                // Abaixo de 75% do estoque máximo -> Cor vermelha
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.red))
-            }
             else -> {
-                // Se o estoque estiver acima de 75% do máximo, usa a cor padrão
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.white))
+                // Se a quantidade for abaixo de 50%, a cor é vermelha
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(activity, R.color.red))
             }
         }
 
