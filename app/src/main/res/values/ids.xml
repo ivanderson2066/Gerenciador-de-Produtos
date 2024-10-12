@@ -35,5 +35,4 @@
     <item name="input_nome_categoria" type="id" />
     <item name="image_preview" type="id" />
     <item name="button_confirmar" type="id" />
-    <item name="text_cancelar" type="id" />
 </resources>
