@@ -43,13 +43,13 @@ class BuscaActivity : AppCompatActivity() {
             carregarProdutosPorCategoria(categoria)
         }
         recyclerViewCategorias.adapter = categoriaAdapter
-// Configurar o botão de voltar
+        // Configurar o botão de voltar
         val btnBack: ImageView = findViewById(R.id.btnBack)
         btnBack.setOnClickListener {
             if (recyclerViewProdutos.visibility == View.VISIBLE) {
                 mostrarCategorias() // Volta para a tela de categorias
             } else {
-                super.onBackPressed() // Comportamento padrão: finalizar a Activity
+                finish() // Comportamento padrão: finalizar a Activity
             }
         }
 
