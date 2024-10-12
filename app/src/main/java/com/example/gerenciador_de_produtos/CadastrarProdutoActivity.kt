@@ -95,8 +95,9 @@ class CadastrarProdutoActivity : AppCompatActivity() {
             imageViewPreview.visibility = View.VISIBLE
         }
 
-        // Configurar o clique do botão "Escolher Imagem"
         buttonEscolherImagem.setOnClickListener {
+            // Limpa a imagem anterior antes de abrir o seletor
+            imageUri = null
             openImagePicker() // Método para abrir o seletor de imagens
         }
 
@@ -107,10 +108,9 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         buttonConfirmar.setOnClickListener {
             val nomeCategoria = input.text.toString().trim()
             if (nomeCategoria.isNotEmpty() && imageUri != null) {
-                // Se uma nova categoria for fornecida e a imagem for selecionada, adiciona a categoria
                 categorias.add(nomeCategoria)
                 adicionarNovaCategoria(nomeCategoria, imageUri!!)  // Adiciona a categoria no Firestore com imagem
-                // Fechar o diálogo
+                // Fechar o diálogo após o cadastro bem-sucedido
                 alertDialog.dismiss()
             } else {
                 showToast("Nome da categoria ou imagem não selecionados!")
