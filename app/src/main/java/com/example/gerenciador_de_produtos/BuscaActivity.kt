@@ -38,7 +38,7 @@ class BuscaActivity : AppCompatActivity() {
         recyclerViewProdutos.visibility = View.GONE
 
         // Configurar RecyclerView de Categorias
-        recyclerViewCategorias.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerViewCategorias.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         categoriaAdapter = CategoryAdapter(emptyList()) { categoria: Categoria ->
             carregarProdutosPorCategoria(categoria)
         }
