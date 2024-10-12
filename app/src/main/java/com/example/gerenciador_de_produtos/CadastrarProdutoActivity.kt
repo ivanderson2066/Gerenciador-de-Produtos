@@ -19,15 +19,8 @@ class CadastrarProdutoActivity : AppCompatActivity() {
     private val databaseHelper = DatabaseHelper() // Referência para o DatabaseHelper
     private var imageUri: Uri? = null // Armazenar a URI da imagem escolhida
     private val categorias = mutableListOf<String>() // Lista de categorias carregada do Firestore
+    private var alertDialog: AlertDialog? = null
 
-    // Registrando o ActivityResultLauncher para escolher uma imagem
-    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            imageUri = it
-            // Reabrir o diálogo após a seleção da imagem, para que o usuário possa continuar
-            showAdicionarCategoriaDialog()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,7 +95,7 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         }
 
         // Criar o diálogo
-        val alertDialog = builder.create()
+        alertDialog = builder.create()
 
         // Configurar o clique do botão "Confirmar"
         buttonConfirmar.setOnClickListener {
@@ -111,27 +104,41 @@ class CadastrarProdutoActivity : AppCompatActivity() {
                 categorias.add(nomeCategoria)
                 adicionarNovaCategoria(nomeCategoria, imageUri!!)  // Adiciona a categoria no Firestore com imagem
                 // Fechar o diálogo após o cadastro bem-sucedido
-                alertDialog.dismiss()
+                alertDialog?.dismiss()
             } else {
                 showToast("Nome da categoria ou imagem não selecionados!")
             }
         }
+
         // Configurar o clique do TextView "Cancelar"
-        alertDialog.setOnShowListener {
+        alertDialog?.setOnShowListener {
             val cancelButton = dialogLayout.findViewById<TextView>(R.id.text_cancelar)
             cancelButton.setOnClickListener {
-                alertDialog.dismiss() // Fechar o diálogo
+                alertDialog?.dismiss() // Fechar o diálogo
             }
         }
 
         // Exibir o diálogo
-        alertDialog.show()
+        alertDialog?.show()
     }
 
     private fun openImagePicker() {
         // Inicia a escolha da imagem da galeria
         imagePickerLauncher.launch("image/*")
     }
+
+    // Atualiza o diálogo quando uma imagem é escolhida
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            imageUri = it
+            // Mostra o diálogo novamente e atualiza a pré-visualização
+            alertDialog?.show()
+            val imageViewPreview = alertDialog?.findViewById<ImageView>(R.id.image_preview)
+            imageViewPreview?.setImageURI(imageUri) // Atualiza a imagem no preview
+            imageViewPreview?.visibility = View.VISIBLE
+        }
+    }
+
 
     private fun adicionarNovaCategoria(nomeCategoria: String, imageUri: Uri) {
         // Chama a função do DatabaseHelper para adicionar a categoria com a imagem
