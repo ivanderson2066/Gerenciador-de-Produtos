@@ -96,4 +96,7 @@
     <string name="categorias">Categorias</string>
     <string name="produtos2">Produtos</string>
     <string name="voltar" />
+    <string name="confirmar" >Confirmar</string>
+    <string name="escolher_imagem">escolher imagem</string>
+    <string name="cancelar">cancelar</string>
 </resources>

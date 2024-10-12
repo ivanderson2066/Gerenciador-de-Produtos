@@ -1,16 +1,30 @@
-<!-- res/layout/dialog_adicionar_categoria.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@android:color/white" >
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/input_nome_categoria"
+    <!-- Campo de Entrada de Nome com TextInputLayout -->
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/digite_o_nome_da_nova_categoria" />
+        android:hint="@string/digite_o_nome_da_nova_categoria"
+        app:boxStrokeColor="@color/primaryColor"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input_nome_categoria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Preview da Imagem Selecionada -->
     <ImageView
         android:id="@+id/image_preview"
         android:layout_width="match_parent"
@@ -18,5 +32,40 @@
         android:layout_marginTop="16dp"
         android:contentDescription="@string/pr_visualiza_o_da_imagem"
         android:scaleType="centerCrop"
-        android:visibility="gone" />
+        android:background="@drawable/borda"
+    android:visibility="gone" />
+
+    <!-- Botão de Escolher Imagem -->
+    <Button
+        android:id="@+id/button_escolher_imagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/escolher_imagem"
+        android:backgroundTint="@color/black"
+        android:textColor="@android:color/white"
+        android:layout_gravity="center_horizontal" />
+
+    <!-- Botão de Confirmar -->
+    <Button
+        android:id="@+id/button_confirmar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/confirmar"
+        android:backgroundTint="@color/black"
+        android:textColor="@android:color/white"
+        android:layout_gravity="center_horizontal" />
+    <!-- Texto clicável para Cancelar -->
+    <TextView
+        android:id="@+id/text_cancelar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/cancelar"
+        android:textColor="@color/red"
+        android:layout_gravity="end"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true" />
 </LinearLayout>

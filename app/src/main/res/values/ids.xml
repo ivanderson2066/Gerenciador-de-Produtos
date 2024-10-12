@@ -31,4 +31,5 @@
     <item name="textViewProdutos" type="id" />
     <item name="gif_50" type="id" />
     <item name="gif_75" type="id" />
+    <item name="button_escolher_imagem" type="id" />
 </resources>

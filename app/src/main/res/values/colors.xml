@@ -5,5 +5,6 @@
     <color name="green">#00FF00</color> <!-- Verde -->
     <color name="white">#FFFFFFFF</color>
     <color name="yellow">#FFFF00</color>
+    <color name="primaryColor">#6200EE</color>
     <color name="blaack">#000000</color>  <!-- Cor preta -->
 r</resources>

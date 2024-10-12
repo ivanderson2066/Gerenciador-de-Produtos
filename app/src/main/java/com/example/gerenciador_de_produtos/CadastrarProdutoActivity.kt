@@ -84,6 +84,8 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         val dialogLayout = layoutInflater.inflate(R.layout.dialog_adicionar_categoria, null)
         val input = dialogLayout.findViewById<TextInputEditText>(R.id.input_nome_categoria)
         val imageViewPreview = dialogLayout.findViewById<ImageView>(R.id.image_preview)
+        val buttonEscolherImagem = dialogLayout.findViewById<Button>(R.id.button_escolher_imagem)
+        val buttonConfirmar = dialogLayout.findViewById<Button>(R.id.button_confirmar)
 
         builder.setView(dialogLayout)
 
@@ -93,26 +95,37 @@ class CadastrarProdutoActivity : AppCompatActivity() {
             imageViewPreview.visibility = View.VISIBLE
         }
 
-        // Botão para selecionar a imagem
-        builder.setNegativeButton("Selecionar imagem") { _, _ ->
-            openImagePicker()
+        // Configurar o clique do botão "Escolher Imagem"
+        buttonEscolherImagem.setOnClickListener {
+            openImagePicker() // Método para abrir o seletor de imagens
         }
 
-        // Botão de confirmação
-        builder.setPositiveButton("Adicionar") { _, _ ->
+        // Criar o diálogo
+        val alertDialog = builder.create()
+
+        // Configurar o clique do botão "Confirmar"
+        buttonConfirmar.setOnClickListener {
             val nomeCategoria = input.text.toString().trim()
             if (nomeCategoria.isNotEmpty() && imageUri != null) {
                 // Se uma nova categoria for fornecida e a imagem for selecionada, adiciona a categoria
                 categorias.add(nomeCategoria)
                 adicionarNovaCategoria(nomeCategoria, imageUri!!)  // Adiciona a categoria no Firestore com imagem
+                // Fechar o diálogo
+                alertDialog.dismiss()
             } else {
                 showToast("Nome da categoria ou imagem não selecionados!")
             }
         }
+        // Configurar o clique do TextView "Cancelar"
+        alertDialog.setOnShowListener {
+            val cancelButton = dialogLayout.findViewById<TextView>(R.id.text_cancelar)
+            cancelButton.setOnClickListener {
+                alertDialog.dismiss() // Fechar o diálogo
+            }
+        }
 
-        // Botão de cancelamento
-        builder.setNeutralButton("Cancelar", null)
-        builder.show()
+        // Exibir o diálogo
+        alertDialog.show()
     }
 
     private fun openImagePicker() {
