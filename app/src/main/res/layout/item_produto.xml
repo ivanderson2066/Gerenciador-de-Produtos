@@ -7,133 +7,135 @@
     <!-- CardView para design moderno com elevação -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:elevation="4dp"
-    android:minWidth="250dp"
-    android:minHeight="150dp"
-    app:cardBackgroundColor="@android:color/white"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="10dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/borda"
-        android:backgroundTint="@android:color/white"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_margin="8dp"
+        android:elevation="4dp"
+        android:minWidth="250dp"
+        android:minHeight="150dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="10dp">
 
-        <!-- Linha para Nome do Produto e GIFs -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/borda"
+            android:backgroundTint="@android:color/white"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Nome do Produto -->
-            <TextView
-                android:id="@+id/nome_produto"
-                android:layout_width="0dp"
+            <!-- Linha para Nome do Produto e GIFs -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/nome_do_produto"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Nome do Produto -->
+                <TextView
+                    android:id="@+id/nome_produto"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/nome_do_produto"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <!-- GIF para 50% -->
+                <ImageView
+                    android:id="@+id/gif_50"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/alerta50"
+                    android:visibility="gone" /> <!-- Mantenha 'gone' se não estiver em uso -->
+
+                <!-- GIF para 75% -->
+                <ImageView
+                    android:id="@+id/gif_75"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_notification"
+                    android:visibility="gone" /> <!-- Ajuste a visibilidade conforme necessário -->
+            </LinearLayout>
+
+            <!-- Quantidade do Produto -->
+            <TextView
+                android:id="@+id/quantidade_produto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="@string/quantidade_0"
                 android:textColor="@android:color/black"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <!-- GIF para 50% -->
-            <ImageView
-                android:id="@+id/gif_50"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/alerta50"
-                android:visibility="gone" /> <!-- Mantenha 'gone' se não estiver em uso -->
+            <!-- Preço do Produto -->
+            <TextView
+                android:id="@+id/preco_produto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="@string/pre_o_r_0_00"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-            <!-- GIF para 75% -->
-            <ImageView
-                android:id="@+id/gif_75"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_notification"
-                android:visibility="gone" /> <!-- Ajuste a visibilidade conforme necessário -->
-        </LinearLayout>
+            <!-- Categoria do Produto -->
+            <TextView
+                android:id="@+id/categoria_produto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="@string/categoria_sem_categoria"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-        <!-- Quantidade do Produto -->
-        <TextView
-            android:id="@+id/quantidade_produto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:text="@string/quantidade_0"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            <!-- Validade do Produto -->
+            <TextView
+                android:id="@+id/validade_produto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="@string/validade_sem_validade"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-        <!-- Preço do Produto -->
-        <TextView
-            android:id="@+id/preco_produto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:text="@string/pre_o_r_0_00"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Categoria do Produto -->
-        <TextView
-            android:id="@+id/categoria_produto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:text="@string/categoria_sem_categoria"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Validade do Produto -->
-        <TextView
-            android:id="@+id/validade_produto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:text="@string/validade_sem_validade"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Botões de Entrada e Saída com largura fixa -->
-        <LinearLayout
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="9dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+            <!-- Botões de Entrada e Saída com largura ajustável -->
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:gravity="center"
+                android:orientation="horizontal">
 
             <Button
                 android:id="@+id/entrada_button"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/green"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/entrada"
-                android:textColor="@android:color/black" />
+                android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/green"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/entrada"
+            android:textColor="@android:color/black" />
 
             <Button
                 android:id="@+id/saida_button"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:backgroundTint="@color/red"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/sa_da"
-                android:textColor="@android:color/black" />
+                android:layout_width="0dp" 
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/red"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/sa_da"
+            android:textColor="@android:color/black" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
