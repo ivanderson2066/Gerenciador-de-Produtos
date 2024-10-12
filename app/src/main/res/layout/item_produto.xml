@@ -108,16 +108,16 @@
             <!-- Botões de Entrada e Saída com largura ajustável -->
             <LinearLayout
                 style="?android:attr/buttonBarStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="9dp"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/entrada_button"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
+                android:layout_width="0dp" 
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@color/green"
@@ -128,9 +128,9 @@
             <Button
                 android:id="@+id/saida_button"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp" 
+                android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:backgroundTint="@color/red"
             android:fontFamily="sans-serif-medium"
