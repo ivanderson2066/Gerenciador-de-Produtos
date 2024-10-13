@@ -179,12 +179,16 @@ class RelatoriosActivity : AppCompatActivity() {
     }
 
     // Salva o relatório filtrado com base nos tipos selecionados
+// Salva o relatório filtrado com base nos tipos selecionados
     private fun salvarRelatorioFiltrado(tiposSelecionados: List<String>, listaRelatorios: List<Relatorio>) {
         // Filtra os relatórios com base nos tipos selecionados
         val relatoriosFiltrados = listaRelatorios.filter { it.tipoOperacao in tiposSelecionados }
 
-        if (relatoriosFiltrados.isNotEmpty()) {
-            salvarPDFNaPastaDownloads(relatoriosFiltrados) // Gera e salva o PDF com os dados filtrados
+        // Ordena os relatórios filtrados por data em ordem decrescente
+        val relatoriosFiltradosOrdenados = relatoriosFiltrados.sortedByDescending { it.horario } // Ordena por data (ou o campo correspondente)
+
+        if (relatoriosFiltradosOrdenados.isNotEmpty()) {
+            salvarPDFNaPastaDownloads(relatoriosFiltradosOrdenados) // Gera e salva o PDF com os dados filtrados
         } else {
             Toast.makeText(this, "Nenhum relatório correspondente encontrado.", Toast.LENGTH_SHORT).show()
         }
