@@ -30,6 +30,7 @@ class RelatoriosActivity : AppCompatActivity() {
     // TextView para limpar o filtro
     private lateinit var tvLimparFiltro: TextView
     private var filtroAtivo = false  // Para controlar se o filtro está aplicado
+    private var relatoriosFiltrados: List<Relatorio>? = null // Armazena relatórios filtrados por data
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +112,9 @@ class RelatoriosActivity : AppCompatActivity() {
                 adapter = RelatorioAdapter(listaRelatorios)
                 recyclerView.adapter = adapter
 
+                // Armazena a lista filtrada
+                relatoriosFiltrados = listaRelatorios
+
                 // Exibir o TextView de limpar filtro quando o filtro estiver ativo
                 filtroAtivo = true
                 tvLimparFiltro.visibility = TextView.VISIBLE
@@ -124,6 +128,7 @@ class RelatoriosActivity : AppCompatActivity() {
     private fun limparFiltro() {
         filtroAtivo = false
         tvLimparFiltro.visibility = TextView.GONE  // Oculta o TextView de limpar filtro
+        relatoriosFiltrados = null // Limpa a lista filtrada
         carregarRelatorios()  // Recarrega todos os relatórios sem filtro
     }
 
@@ -157,19 +162,31 @@ class RelatoriosActivity : AppCompatActivity() {
 
     // Filtra os relatórios de acordo com a seleção do usuário (Entrada, Saída ou Ambos) e gera o PDF
     private fun baixarRelatorioFiltrado(tiposSelecionados: List<String>) {
-        databaseHelper.obterRelatorios { listaRelatorios ->
-            if (listaRelatorios.isNotEmpty()) {
-                // Filtra os relatórios com base nos tipos selecionados
-                val relatoriosFiltrados = listaRelatorios.filter { it.tipoOperacao in tiposSelecionados }
-
-                if (relatoriosFiltrados.isNotEmpty()) {
-                    salvarPDFNaPastaDownloads(relatoriosFiltrados) // Gera e salva o PDF com os dados filtrados
+        // Se a lista de relatórios filtrados não for nula, utilizamos ela; caso contrário, pegamos todos os relatórios
+        val listaRelatorios = relatoriosFiltrados ?: run {
+            databaseHelper.obterRelatorios { lista ->
+                if (lista.isNotEmpty()) {
+                    salvarRelatorioFiltrado(tiposSelecionados, lista)
                 } else {
-                    Toast.makeText(this, "Nenhum relatório correspondente encontrado.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Nenhum relatório disponível.", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "Nenhum relatório disponível.", Toast.LENGTH_SHORT).show()
             }
+            return // Saia da função até que os dados sejam carregados
+        }
+
+        // Salva o relatório filtrado
+        salvarRelatorioFiltrado(tiposSelecionados, listaRelatorios)
+    }
+
+    // Salva o relatório filtrado com base nos tipos selecionados
+    private fun salvarRelatorioFiltrado(tiposSelecionados: List<String>, listaRelatorios: List<Relatorio>) {
+        // Filtra os relatórios com base nos tipos selecionados
+        val relatoriosFiltrados = listaRelatorios.filter { it.tipoOperacao in tiposSelecionados }
+
+        if (relatoriosFiltrados.isNotEmpty()) {
+            salvarPDFNaPastaDownloads(relatoriosFiltrados) // Gera e salva o PDF com os dados filtrados
+        } else {
+            Toast.makeText(this, "Nenhum relatório correspondente encontrado.", Toast.LENGTH_SHORT).show()
         }
     }
 
