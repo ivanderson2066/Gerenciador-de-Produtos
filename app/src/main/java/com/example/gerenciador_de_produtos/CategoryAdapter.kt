@@ -1,6 +1,5 @@
 package com.example.gerenciador_de_produtos
 
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,10 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
 import com.squareup.picasso.Picasso
 
-
 class CategoryAdapter(
     private val categorias: List<Categoria>,
-    private val onCategoryClick: (Categoria) -> Unit
+    private val onCategoryClick: (Categoria) -> Unit,
+    private val onCategoryLongClick: (Categoria) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
     inner class CategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -24,6 +23,12 @@ class CategoryAdapter(
             categoryName.text = categoria.nome
             // Carregar a imagem da URL (se houver)
             Picasso.get().load(categoria.imagemUrl).into(categoryImage)
+
+            // Configurar o clique longo
+            itemView.setOnLongClickListener {
+                onCategoryLongClick(categoria) // Chama o listener de clique longo
+                true // Retorna true para indicar que o evento foi consumido
+            }
 
             itemView.setOnClickListener {
                 onCategoryClick(categoria)

@@ -49,6 +49,36 @@ class DatabaseHelper {
                 callback(false)
             }
     }
+    fun excluirCategoria(categoriaId: String, imagemUrl: String, callback: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+
+        // Excluir a categoria do Firestore
+        val categoriaRef = db.collection("users").document(userId)
+            .collection("categorias")
+            .document(categoriaId)
+
+        // Criar uma referência para a imagem no Firebase Storage
+        val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imagemUrl)
+
+        // Primeiro, deletar a imagem do Firebase Storage
+        storageRef.delete()
+            .addOnSuccessListener {
+                // Se a imagem foi excluída com sucesso, então exclua a categoria do Firestore
+                categoriaRef.delete()
+                    .addOnSuccessListener {
+                        Log.d("Firestore", "Categoria excluída com ID: $categoriaId")
+                        callback(true)  // Sucesso na exclusão
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("Firestore", "Erro ao excluir categoria: ${e.message}")
+                        callback(false)  // Falha ao excluir a categoria
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.w("FirebaseStorage", "Erro ao excluir a imagem: ${e.message}")
+                callback(false)  // Falha ao excluir a imagem
+            }
+    }
 
     // Adiciona um produto ao Firestore
     fun adicionarProduto(nome: String, quantidade: Int, preco: Double, categoria: String, validade: String?, callback: (Boolean, String?) -> Unit) {
@@ -324,15 +354,18 @@ class DatabaseHelper {
             .addOnSuccessListener {
                 // Recupera a URL da imagem após o upload ser concluído
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    // Cria os dados da categoria com a URL da imagem
+                    // Cria uma nova referência para a categoria no Firestore
+                    val categoriaRef = db.collection("users").document(userId).collection("categorias").document()
+
+                    // Cria os dados da categoria com a URL da imagem e o ID da categoria
                     val categoriaData = hashMapOf(
                         "nome" to nomeCategoria,
-                        "imagemUrl" to uri.toString() // URL da imagem armazenada no Firebase Storage
+                        "imagemUrl" to uri.toString(), // URL da imagem armazenada no Firebase Storage
+                        "id" to categoriaRef.id // Adiciona o ID da categoria
                     )
 
                     // Adiciona a categoria ao Firestore
-                    db.collection("users").document(userId).collection("categorias")
-                        .add(categoriaData)
+                    categoriaRef.set(categoriaData)
                         .addOnSuccessListener {
                             callback(true, null) // Sucesso
                         }

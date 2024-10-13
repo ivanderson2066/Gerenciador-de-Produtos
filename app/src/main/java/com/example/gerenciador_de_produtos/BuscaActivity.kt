@@ -3,11 +3,13 @@ package com.example.gerenciador_de_produtos
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import android.widget.SearchView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.widget.SearchView
-import android.widget.TextView
 import com.example.gerenciadordeprodutos.R
 
 class BuscaActivity : AppCompatActivity() {
@@ -18,13 +20,14 @@ class BuscaActivity : AppCompatActivity() {
     private lateinit var textViewCategorias: TextView
     private lateinit var textViewProdutos: TextView
 
-    private val dbHelper = DatabaseHelper()
+    private lateinit var dbHelper: DatabaseHelper // Inicializando corretamente
+
     private lateinit var categoriaAdapter: CategoryAdapter
     private lateinit var produtoAdapter: ProdutoAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activy_busca)  // Corrigir o nome do layout para "activity_busca"
+        setContentView(R.layout.activy_busca) // Corrigido para "activity_busca"
 
         // Inicializar views
         recyclerViewCategorias = findViewById(R.id.recyclerViewCategorias)
@@ -37,12 +40,18 @@ class BuscaActivity : AppCompatActivity() {
         textViewProdutos.visibility = View.GONE
         recyclerViewProdutos.visibility = View.GONE
 
+        // Inicializar o DatabaseHelper com o contexto atual
+        dbHelper = DatabaseHelper()
+
         // Configurar RecyclerView de Categorias
-        recyclerViewCategorias.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        categoriaAdapter = CategoryAdapter(emptyList()) { categoria: Categoria ->
+        recyclerViewCategorias.layoutManager = LinearLayoutManager(this)
+        categoriaAdapter = CategoryAdapter(emptyList(), { categoria: Categoria ->
             carregarProdutosPorCategoria(categoria)
-        }
+        }, { categoria: Categoria ->
+            mostrarDialogoExcluirCategoria(categoria) // Clique longo para excluir categoria
+        })
         recyclerViewCategorias.adapter = categoriaAdapter
+
         // Configurar o botão de voltar
         val btnBack: ImageView = findViewById(R.id.btnBack)
         btnBack.setOnClickListener {
@@ -58,13 +67,8 @@ class BuscaActivity : AppCompatActivity() {
         produtoAdapter = ProdutoAdapter(emptyList(), this)
         recyclerViewProdutos.adapter = produtoAdapter
 
-        // Buscar Categorias
-        dbHelper.obterCategorias { categorias ->
-            categoriaAdapter = CategoryAdapter(categorias) { categoria: Categoria ->
-                carregarProdutosPorCategoria(categoria)
-            }
-            recyclerViewCategorias.adapter = categoriaAdapter
-        }
+        // Carregar as categorias e configurar o adapter
+        atualizarCategorias()
 
         // Configurar SearchView para buscar produtos por nome
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -129,4 +133,41 @@ class BuscaActivity : AppCompatActivity() {
         textViewProdutos.visibility = View.GONE
         recyclerViewProdutos.visibility = View.GONE
     }
+
+    // Atualiza a lista de categorias
+    private fun atualizarCategorias() {
+        dbHelper.obterCategorias { categorias ->
+            categoriaAdapter = CategoryAdapter(categorias, { categoria: Categoria ->
+                carregarProdutosPorCategoria(categoria)
+            }, { categoria: Categoria ->
+                mostrarDialogoExcluirCategoria(categoria) // Novo listener para clique longo
+            })
+            recyclerViewCategorias.adapter = categoriaAdapter
+        }
+    }
+
+    // Mostra um diálogo de confirmação para excluir a categoria
+// Mostra um diálogo de confirmação para excluir a categoria
+    private fun mostrarDialogoExcluirCategoria(categoria: Categoria) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Excluir Categoria")
+        builder.setMessage("Tem certeza de que deseja excluir a categoria '${categoria.nome}'?")
+
+        builder.setPositiveButton("Sim") { _, _ ->
+            // Chame o método excluirCategoria passando o id da categoria e a imagemUrl
+            dbHelper.excluirCategoria(categoria.id, categoria.imagemUrl) { sucesso ->
+                if (sucesso) {
+                    // Categoria excluída com sucesso, atualiza a lista
+                    atualizarCategorias()
+                    Toast.makeText(this, "Categoria excluída com sucesso!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Erro ao excluir a categoria.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        builder.setNegativeButton("Não") { dialog, _ -> dialog.dismiss() }
+        builder.show()
+    }
+
 }

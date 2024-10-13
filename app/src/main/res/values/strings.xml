@@ -101,4 +101,6 @@
     <string name="cancelar">cancelar</string>
     <string name="limpar_filtro">Limpar Filtro</string>
     <string name="todofiltro">filtrar por data</string>
+    <string name="editarcategoria" />
+    <string name="excluircategoria" />
 </resources>
