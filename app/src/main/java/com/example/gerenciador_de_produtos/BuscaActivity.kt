@@ -1,16 +1,21 @@
 package com.example.gerenciador_de_produtos
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.gerenciadordeprodutos.R
+import com.google.android.material.textfield.TextInputEditText
 
 class BuscaActivity : AppCompatActivity() {
 
@@ -20,10 +25,22 @@ class BuscaActivity : AppCompatActivity() {
     private lateinit var textViewCategorias: TextView
     private lateinit var textViewProdutos: TextView
 
-    private lateinit var dbHelper: DatabaseHelper // Inicializando corretamente
-
+    private lateinit var dbHelper: DatabaseHelper
     private lateinit var categoriaAdapter: CategoryAdapter
     private lateinit var produtoAdapter: ProdutoAdapter
+
+    private var imageUri: Uri? = null // URI da imagem escolhida
+
+    // Launcher para a seleção de imagem
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            imageUri = it
+            val imageView = findViewById<ImageView>(R.id.image_preview)
+            imageView.setImageURI(imageUri)
+            imageView.visibility = View.VISIBLE
+            imageView.tag = imageUri.toString() // Salvar a URI da imagem selecionada
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +65,7 @@ class BuscaActivity : AppCompatActivity() {
         categoriaAdapter = CategoryAdapter(emptyList(), { categoria: Categoria ->
             carregarProdutosPorCategoria(categoria)
         }, { categoria: Categoria ->
-            mostrarDialogoExcluirCategoria(categoria) // Clique longo para excluir categoria
+            mostrarOpcoesCategoria(categoria) // Clique longo para editar ou excluir categoria
         })
         recyclerViewCategorias.adapter = categoriaAdapter
 
@@ -90,6 +107,64 @@ class BuscaActivity : AppCompatActivity() {
                 return true
             }
         })
+    }
+
+    private fun mostrarDialogoEditarCategoria(categoria: Categoria) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Editar Categoria")
+
+        // Inflate o layout do diálogo
+        val viewInflated = layoutInflater.inflate(R.layout.dialog_edit_categoria, null)
+        val editTextNome = viewInflated.findViewById<TextInputEditText>(R.id.input_nome_categoria)
+        val imageViewPreview = viewInflated.findViewById<ImageView>(R.id.image_preview)
+        val buttonEscolherImagem = viewInflated.findViewById<Button>(R.id.button_escolher_imagem)
+
+        // Carregar o nome e a imagem atual da categoria
+        editTextNome.setText(categoria.nome)
+        Glide.with(this)
+            .load(categoria.imagemUrl)
+            .into(imageViewPreview)
+        imageViewPreview.visibility = View.VISIBLE
+
+        buttonEscolherImagem.setOnClickListener {
+            escolherImagem() // Chama o método para abrir o seletor de imagens
+        }
+
+        builder.setView(viewInflated)
+
+        builder.setPositiveButton("Salvar") { _, _ ->
+            val novoNome = editTextNome.text.toString()
+            val novaImagemUrl = imageViewPreview.tag?.toString() ?: categoria.imagemUrl // Mantém a imagem se nenhuma nova for escolhida
+
+            dbHelper.editarCategoria(categoria.id, novoNome, novaImagemUrl) { sucesso ->
+                if (sucesso) {
+                    atualizarCategorias()
+                    Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Erro ao editar a categoria.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+        builder.show()
+    }
+
+    private fun escolherImagem() {
+        // Inicia a escolha da imagem da galeria
+        imagePickerLauncher.launch("image/*")
+    }
+
+    private fun mostrarOpcoesCategoria(categoria: Categoria) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Escolha uma opção")
+        builder.setItems(arrayOf("Editar", "Excluir")) { _, which ->
+            when (which) {
+                0 -> mostrarDialogoEditarCategoria(categoria) // Editar
+                1 -> mostrarDialogoExcluirCategoria(categoria) // Excluir
+            }
+        }
+        builder.show()
     }
 
     // Carrega os produtos da categoria selecionada
@@ -140,7 +215,7 @@ class BuscaActivity : AppCompatActivity() {
             categoriaAdapter = CategoryAdapter(categorias, { categoria: Categoria ->
                 carregarProdutosPorCategoria(categoria)
             }, { categoria: Categoria ->
-                mostrarDialogoExcluirCategoria(categoria) // Novo listener para clique longo
+                mostrarOpcoesCategoria(categoria) // Clique longo mostra opções de editar/excluir
             })
             recyclerViewCategorias.adapter = categoriaAdapter
         }
@@ -165,5 +240,4 @@ class BuscaActivity : AppCompatActivity() {
         builder.setNegativeButton("Não") { dialog, _ -> dialog.dismiss() }
         builder.show()
     }
-
 }

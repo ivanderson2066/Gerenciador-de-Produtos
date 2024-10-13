@@ -110,6 +110,33 @@ class DatabaseHelper {
                 }
             }
     }
+    fun editarCategoria(categoriaId: String, novoNome: String, novaImagemUrl: String?, callback: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+
+        val categoriaRef = db.collection("users").document(userId)
+            .collection("categorias")
+            .document(categoriaId)
+
+        // Atualiza os dados da categoria
+        val categoriaData = hashMapOf<String, Any>(
+            "nome" to novoNome
+        )
+
+        // Se uma nova imagem foi fornecida, atualiza a URL da imagem
+        if (!novaImagemUrl.isNullOrEmpty()) {
+            categoriaData["imagemUrl"] = novaImagemUrl
+        }
+
+        categoriaRef.update(categoriaData)
+            .addOnSuccessListener {
+                Log.d("Firestore", "Categoria atualizada com ID: $categoriaId")
+                callback(true) // Sucesso
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Erro ao atualizar categoria: ${e.message}")
+                callback(false) // Falha
+            }
+    }
 
     // Adiciona um produto ao Firestore
     fun adicionarProduto(nome: String, quantidade: Int, preco: Double, categoria: String, validade: String?, callback: (Boolean, String?) -> Unit) {

@@ -3,8 +3,10 @@ agp = "8.6.0"
 androidxCoreKtx = "1.10.0"
 anychart = "1.0.0"
 cardview = "1.0.0"
+compiler = "4.15.1"
 eazegraph = "1.2.5l"
 firebaseBom = "33.3.0"
+glide = "4.15.1"
 itext7CoreVersion = "7.1.15"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
@@ -29,11 +31,13 @@ firebaseStorageKtx = "21.0.1"
 androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 anychart = { module = "com.anychart:AnyChart", version.ref = "anychart" }
+compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
 core-ktx-v1100 = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
 eazegraph = { module = "com.github.blackfizz:eazegraph", version.ref = "eazegraph" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 itextpdf-itext7-core = { module = "com.itextpdf:itext7-core", version.ref = "itext7CoreVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

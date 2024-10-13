@@ -103,4 +103,5 @@
     <string name="todofiltro">filtrar por data</string>
     <string name="editarcategoria" />
     <string name="excluircategoria" />
+    <string name="edite_o_nome_da_categoria">edite o nome da categoria</string>
 </resources>
