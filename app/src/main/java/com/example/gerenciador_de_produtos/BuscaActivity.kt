@@ -146,22 +146,18 @@ class BuscaActivity : AppCompatActivity() {
         }
     }
 
-    // Mostra um diálogo de confirmação para excluir a categoria
-// Mostra um diálogo de confirmação para excluir a categoria
     private fun mostrarDialogoExcluirCategoria(categoria: Categoria) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Excluir Categoria")
         builder.setMessage("Tem certeza de que deseja excluir a categoria '${categoria.nome}'?")
 
         builder.setPositiveButton("Sim") { _, _ ->
-            // Chame o método excluirCategoria passando o id da categoria e a imagemUrl
-            dbHelper.excluirCategoria(categoria.id, categoria.imagemUrl) { sucesso ->
+            dbHelper.excluirCategoria(categoria.id, categoria.imagemUrl, categoria.nome) { sucesso ->
                 if (sucesso) {
-                    // Categoria excluída com sucesso, atualiza a lista
                     atualizarCategorias()
                     Toast.makeText(this, "Categoria excluída com sucesso!", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "Erro ao excluir a categoria.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Erro ao excluir a categoria. Pode haver produtos associados.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
