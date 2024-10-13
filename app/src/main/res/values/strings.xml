@@ -100,4 +100,5 @@
     <string name="escolher_imagem">escolher imagem</string>
     <string name="cancelar">cancelar</string>
     <string name="limpar_filtro">Limpar Filtro</string>
+    <string name="todofiltro">filtrar por data</string>
 </resources>
