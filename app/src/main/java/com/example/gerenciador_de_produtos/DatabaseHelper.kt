@@ -6,6 +6,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
@@ -139,6 +141,46 @@ class DatabaseHelper {
                 callback(false)
             }
     }
+
+    fun filtrarRelatoriosPorDataApenas(inicio: Date, fim: Date, callback: (List<Relatorio>) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+
+        // Ajustar o início da data (00:00:00) e o fim da data (23:59:59)
+        val calInicio = Calendar.getInstance()
+        calInicio.time = inicio
+        calInicio.set(Calendar.HOUR_OF_DAY, 0)
+        calInicio.set(Calendar.MINUTE, 0)
+        calInicio.set(Calendar.SECOND, 0)
+        calInicio.set(Calendar.MILLISECOND, 0)
+        val dataInicioAjustada = calInicio.time
+
+        val calFim = Calendar.getInstance()
+        calFim.time = fim
+        calFim.set(Calendar.HOUR_OF_DAY, 23)
+        calFim.set(Calendar.MINUTE, 59)
+        calFim.set(Calendar.SECOND, 59)
+        calFim.set(Calendar.MILLISECOND, 999)
+        val dataFimAjustada = calFim.time
+
+        // Filtrar os relatórios entre as datas ajustadas
+        db.collection("users").document(userId).collection("relatorios")
+            .whereGreaterThanOrEqualTo("horario", dataInicioAjustada)  // Filtra a partir do início do dia
+            .whereLessThanOrEqualTo("horario", dataFimAjustada)  // Até o final do dia
+            .get()
+            .addOnSuccessListener { result ->
+                val listaRelatorios = mutableListOf<Relatorio>()
+                for (document in result) {
+                    val relatorio = document.toObject(Relatorio::class.java)
+                    listaRelatorios.add(relatorio)
+                }
+                callback(listaRelatorios)
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Erro ao filtrar relatórios por data", e)
+                callback(emptyList())
+            }
+    }
+
     private fun atualizarVendasProduto(nomeProduto: String, quantidade: Int) {
         val userId = auth.currentUser?.uid ?: return
         val produtosRef = db.collection("users").document(userId).collection("produtos")

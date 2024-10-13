@@ -1,10 +1,12 @@
 package com.example.gerenciador_de_produtos
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.ContentValues
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.DatePicker
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.OutputStream
+import java.util.Calendar
+import java.util.Date
 
 class RelatoriosActivity : AppCompatActivity() {
 
@@ -40,12 +44,17 @@ class RelatoriosActivity : AppCompatActivity() {
             exibirDialogoSelecao() // Exibir o diálogo de seleção ao clicar no botão de baixar
         }
 
+        // Configura o FloatingActionButton para filtrar por data
+        val fabFiltrarData = findViewById<FloatingActionButton>(R.id.fab_filtrar_data)
+        fabFiltrarData.setOnClickListener {
+            exibirDialogoSelecaoData() // Exibir o diálogo de seleção de data
+        }
+
         carregarRelatorios()
     }
 
     // Exibe um diálogo com checkboxes para o usuário escolher entre Entradas, Saídas ou ambos
     private fun exibirDialogoSelecao() {
-        // Opções do diálogo
         val opcoes = arrayOf("Entradas", "Saídas")
         val selecionados = booleanArrayOf(false, false) // Estado inicial dos checkboxes (não selecionados)
 
@@ -70,6 +79,43 @@ class RelatoriosActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancelar", null)
             .show()
+    }
+
+    // Exibe um diálogo para o usuário selecionar o intervalo de datas
+    private fun exibirDialogoSelecaoData() {
+        val calendar = Calendar.getInstance()
+        val ano = calendar.get(Calendar.YEAR)
+        val mes = calendar.get(Calendar.MONTH)
+        val dia = calendar.get(Calendar.DAY_OF_MONTH)
+
+        // Seletor de data para a data de início
+        DatePickerDialog(this, { _: DatePicker, anoInicio: Int, mesInicio: Int, diaInicio: Int ->
+            val dataInicio = Calendar.getInstance().apply {
+                set(anoInicio, mesInicio, diaInicio)
+            }.time
+
+            // Seletor de data para a data de fim
+            DatePickerDialog(this, { _: DatePicker, anoFim: Int, mesFim: Int, diaFim: Int ->
+                val dataFim = Calendar.getInstance().apply {
+                    set(anoFim, mesFim, diaFim)
+                }.time
+
+                // Filtra relatórios entre as datas selecionadas
+                filtrarRelatoriosPorData(dataInicio, dataFim)
+            }, ano, mes, dia).show()
+        }, ano, mes, dia).show()
+    }
+
+    // Filtra os relatórios de acordo com a data selecionada
+    private fun filtrarRelatoriosPorData(dataInicio: Date, dataFim: Date) {
+        databaseHelper.filtrarRelatoriosPorDataApenas(dataInicio, dataFim) { listaRelatorios ->
+            if (listaRelatorios.isNotEmpty()) {
+                adapter = RelatorioAdapter(listaRelatorios)
+                recyclerView.adapter = adapter
+            } else {
+                Toast.makeText(this, "Nenhum relatório encontrado para o intervalo de datas selecionado.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // Filtra os relatórios de acordo com a seleção do usuário (Entrada, Saída ou Ambos) e gera o PDF
@@ -142,7 +188,6 @@ class RelatoriosActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun handleOnBackPressed() {
         onBackPressedDispatcher.onBackPressed()

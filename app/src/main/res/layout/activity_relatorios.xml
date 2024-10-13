@@ -4,7 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="10dp">
 
-    <!-- Linha com botão de voltar e título centralizado (fixo no topo) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,7 +19,7 @@
             android:background="?android:attr/selectableItemBackground"
             android:contentDescription="@string/volta_tela_cadastror"
             android:scaleType="centerInside"
-            android:src="@drawable/b" /> <!-- Ícone de voltar -->
+            android:src="@drawable/b" />
 
         <Space
             android:layout_width="0dp"
@@ -41,13 +40,23 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- RecyclerView ocupa o restante da tela -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/relatorios_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="top"
-        android:layout_marginTop="60dp" /> <!-- Reduzi o espaço do marginTop -->
+        android:layout_marginTop="60dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_filtrar_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="80dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="TODO"
+        app:srcCompat="@drawable/calendario"
+        app:fabSize="normal"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_baixar_pdf"
@@ -58,5 +67,4 @@
         android:contentDescription="@string/baixar_relatorio"
         app:srcCompat="@drawable/ic_download"
         app:fabSize="normal" />
-
 </FrameLayout>
