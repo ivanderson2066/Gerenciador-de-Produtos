@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.DatePicker
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,10 @@ class RelatoriosActivity : AppCompatActivity() {
     private lateinit var adapter: RelatorioAdapter
     private val databaseHelper = DatabaseHelper()
     private lateinit var pdfHelper: PdfHelper
+
+    // TextView para limpar o filtro
+    private lateinit var tvLimparFiltro: TextView
+    private var filtroAtivo = false  // Para controlar se o filtro está aplicado
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +55,76 @@ class RelatoriosActivity : AppCompatActivity() {
             exibirDialogoSelecaoData() // Exibir o diálogo de seleção de data
         }
 
-        carregarRelatorios()
+        // Inicializa o TextView de limpar filtro e define seu comportamento
+        tvLimparFiltro = findViewById(R.id.tv_limpar_filtro)
+        tvLimparFiltro.setOnClickListener {
+            limparFiltro()  // Limpar o filtro ao clicar
+        }
+
+        carregarRelatorios()  // Carrega todos os relatórios inicialmente
+    }
+
+    // Exibe um diálogo para o usuário selecionar o intervalo de datas
+    private fun exibirDialogoSelecaoData() {
+        val calendar = Calendar.getInstance()
+        val ano = calendar.get(Calendar.YEAR)
+        val mes = calendar.get(Calendar.MONTH)
+        val dia = calendar.get(Calendar.DAY_OF_MONTH)
+
+        // Seletor de data para a data de início
+        val datePickerInicio = DatePickerDialog(
+            this, { _: DatePicker, anoInicio: Int, mesInicio: Int, diaInicio: Int ->
+                val dataInicio = Calendar.getInstance().apply {
+                    set(anoInicio, mesInicio, diaInicio)
+                }.time
+
+                // Seletor de data para a data de fim, exibido após a seleção da data de início
+                val datePickerFim = DatePickerDialog(
+                    this, { _: DatePicker, anoFim: Int, mesFim: Int, diaFim: Int ->
+                        val dataFim = Calendar.getInstance().apply {
+                            set(anoFim, mesFim, diaFim)
+                        }.time
+
+                        // Filtra relatórios entre as datas selecionadas
+                        filtrarRelatoriosPorData(dataInicio, dataFim)
+                    },
+                    ano, mes, dia
+                )
+
+                // Define o título para o DatePicker da data de fim
+                datePickerFim.setTitle("Selecionar data de fim")
+                datePickerFim.show()
+
+            },
+            ano, mes, dia
+        )
+
+        // Define o título para o DatePicker da data de início
+        datePickerInicio.setTitle("Selecionar data de início")
+        datePickerInicio.show()
+    }
+
+    // Filtra os relatórios de acordo com a data selecionada
+    private fun filtrarRelatoriosPorData(dataInicio: Date, dataFim: Date) {
+        databaseHelper.filtrarRelatoriosPorDataApenas(dataInicio, dataFim) { listaRelatorios ->
+            if (listaRelatorios.isNotEmpty()) {
+                adapter = RelatorioAdapter(listaRelatorios)
+                recyclerView.adapter = adapter
+
+                // Exibir o TextView de limpar filtro quando o filtro estiver ativo
+                filtroAtivo = true
+                tvLimparFiltro.visibility = TextView.VISIBLE
+            } else {
+                Toast.makeText(this, "Nenhum relatório encontrado para o intervalo de datas selecionado.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Limpar o filtro e recarregar todos os relatórios
+    private fun limparFiltro() {
+        filtroAtivo = false
+        tvLimparFiltro.visibility = TextView.GONE  // Oculta o TextView de limpar filtro
+        carregarRelatorios()  // Recarrega todos os relatórios sem filtro
     }
 
     // Exibe um diálogo com checkboxes para o usuário escolher entre Entradas, Saídas ou ambos
@@ -79,43 +153,6 @@ class RelatoriosActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancelar", null)
             .show()
-    }
-
-    // Exibe um diálogo para o usuário selecionar o intervalo de datas
-    private fun exibirDialogoSelecaoData() {
-        val calendar = Calendar.getInstance()
-        val ano = calendar.get(Calendar.YEAR)
-        val mes = calendar.get(Calendar.MONTH)
-        val dia = calendar.get(Calendar.DAY_OF_MONTH)
-
-        // Seletor de data para a data de início
-        DatePickerDialog(this, { _: DatePicker, anoInicio: Int, mesInicio: Int, diaInicio: Int ->
-            val dataInicio = Calendar.getInstance().apply {
-                set(anoInicio, mesInicio, diaInicio)
-            }.time
-
-            // Seletor de data para a data de fim
-            DatePickerDialog(this, { _: DatePicker, anoFim: Int, mesFim: Int, diaFim: Int ->
-                val dataFim = Calendar.getInstance().apply {
-                    set(anoFim, mesFim, diaFim)
-                }.time
-
-                // Filtra relatórios entre as datas selecionadas
-                filtrarRelatoriosPorData(dataInicio, dataFim)
-            }, ano, mes, dia).show()
-        }, ano, mes, dia).show()
-    }
-
-    // Filtra os relatórios de acordo com a data selecionada
-    private fun filtrarRelatoriosPorData(dataInicio: Date, dataFim: Date) {
-        databaseHelper.filtrarRelatoriosPorDataApenas(dataInicio, dataFim) { listaRelatorios ->
-            if (listaRelatorios.isNotEmpty()) {
-                adapter = RelatorioAdapter(listaRelatorios)
-                recyclerView.adapter = adapter
-            } else {
-                Toast.makeText(this, "Nenhum relatório encontrado para o intervalo de datas selecionado.", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     // Filtra os relatórios de acordo com a seleção do usuário (Entrada, Saída ou Ambos) e gera o PDF
@@ -175,6 +212,7 @@ class RelatoriosActivity : AppCompatActivity() {
         pdfHelper.gerarRelatorioPDF(relatoriosFiltrados, outputStream)
     }
 
+    // Função para carregar todos os relatórios
     private fun carregarRelatorios() {
         databaseHelper.obterRelatorios { listaRelatorios ->
             if (listaRelatorios.isNotEmpty()) {
