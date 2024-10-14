@@ -257,6 +257,31 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
                 callback(false, null) // Falha ao fazer o upload da nova imagem
             }
     }
+    fun atualizarProduto(produto: Produto, callback: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+
+        // Gera o nomeMin a partir do nome atual do produto
+        val nomeMin = produto.nome.lowercase(Locale.getDefault()).trim()
+
+        // Adiciona a categoria ao hashMap
+        val produtoData = hashMapOf<String, Any>(
+            "nome" to produto.nome,
+            "nomeMin" to nomeMin, // Inclui o campo nomeMin
+            "validade" to (produto.validade ?: ""),
+            "estoqueMaximo" to produto.estoqueMaximo,
+            "categoria" to produto.categoria // Incluindo o campo de categoria
+        )
+
+        db.collection("users").document(userId).collection("produtos").document(produto.id)
+            .update(produtoData)
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Erro ao atualizar produto", e)
+                callback(false)
+            }
+    }
 
     // Adiciona um produto ao Firestore
     fun adicionarProduto(nome: String, quantidade: Int, preco: Double, categoria: String, validade: String?, callback: (Boolean, String?) -> Unit) {
@@ -476,27 +501,6 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
             }
     }
 
-    fun atualizarProduto(produto: Produto, callback: (Boolean) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return
-
-        // Adiciona a categoria ao hashMap
-        val produtoData = hashMapOf<String, Any>(
-            "nome" to produto.nome,
-            "validade" to (produto.validade ?: ""),
-            "estoqueMaximo" to produto.estoqueMaximo,
-            "categoria" to produto.categoria // Incluindo o campo de categoria
-        )
-
-        db.collection("users").document(userId).collection("produtos").document(produto.id)
-            .update(produtoData)
-            .addOnSuccessListener {
-                callback(true)
-            }
-            .addOnFailureListener { e ->
-                Log.w("Firestore", "Erro ao atualizar produto", e)
-                callback(false)
-            }
-    }
 
     fun obterProdutosPorCategoria(categoriaNome: String, callback: (List<Produto>) -> Unit) {
         val userId = auth.currentUser?.uid ?: return
