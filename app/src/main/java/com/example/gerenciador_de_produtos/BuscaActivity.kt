@@ -131,8 +131,8 @@ class BuscaActivity : AppCompatActivity() {
             .into(imageViewInDialog!!)
         imageViewInDialog!!.visibility = View.VISIBLE
 
-        // Limpar a URI da imagem antes de escolher uma nova
-        imageUri = null // Resetar imageUri para null, assim sabemos se o usuário escolheu uma nova
+        // Resetar imageUri para null, assim sabemos se o usuário escolheu uma nova imagem
+        imageUri = null
 
         buttonEscolherImagem.setOnClickListener {
             escolherImagem() // Chama o método para abrir o seletor de imagens
@@ -149,27 +149,37 @@ class BuscaActivity : AppCompatActivity() {
                 return@setPositiveButton
             }
 
-            // Atualizar o nome da categoria independentemente do upload da imagem
-            dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
-                if (!sucessoNome) {
-                    Toast.makeText(this, "Erro ao editar o nome da categoria.", Toast.LENGTH_SHORT).show()
-                    return@editarCategoriaNome
-                }
-
-                // Verificar se uma nova imagem foi selecionada e fazer o upload
-                if (imageUri != null) {
-                    dbHelper.editarCategoriaImagem(categoria.id, imageUri!!, categoria.imagemUrl) { sucessoImagem ->
-                        if (sucessoImagem) {
-                            atualizarCategorias()
-                            Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(this, "Erro ao editar a imagem da categoria.", Toast.LENGTH_SHORT).show()
+            // Se a imagem foi alterada, realiza o upload primeiro
+            if (imageUri != null) {
+                // Chama o método de editar a categoria com a nova imagem (Uri)
+                dbHelper.editarCategoriaImagem(categoria.id, imageUri!!,
+                    categoria.imagemUrl
+                ) { sucessoImagem, _ ->
+                    if (sucessoImagem) {
+                        // Aqui você chama a função para editar o nome e a nova imagem
+                        dbHelper.editarCategoriaNomeEImagem(
+                            categoria.id, novoNome, imageUri!!
+                        ) { sucesso ->
+                            if (sucesso) {
+                                atualizarCategorias()
+                                Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this, "Erro ao editar a categoria.", Toast.LENGTH_SHORT).show()
+                            }
                         }
+                    } else {
+                        Toast.makeText(this, "Erro ao fazer o upload da imagem.", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    // Se não houve alteração na imagem, apenas atualiza as categorias
-                    atualizarCategorias()
-                    Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                // Se a imagem não foi alterada, apenas atualiza o nome
+                dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
+                    if (sucessoNome) {
+                        atualizarCategorias()
+                        Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Erro ao editar o nome da categoria.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -177,7 +187,6 @@ class BuscaActivity : AppCompatActivity() {
         builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
         builder.show()
     }
-
     private fun escolherImagem() {
         // Inicia a escolha da imagem da galeria
         imagePickerLauncher.launch("image/*")

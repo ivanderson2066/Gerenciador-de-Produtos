@@ -156,7 +156,8 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
             return
         }
 
-        val categoriaRef = db.collection("users").document(userId).collection("categorias").document(categoriaId)
+        val categoriaRef =
+            db.collection("users").document(userId).collection("categorias").document(categoriaId)
 
         val updates = mapOf("nome" to novoNome)
 
@@ -168,12 +169,65 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
                 callback(false)
             }
     }
-
-    // Método para editar a imagem da categoria
-    fun editarCategoriaImagem(categoriaId: String, novaImagemUri: Uri, imagemAntigaUrl: String, callback: (Boolean) -> Unit) {
+    fun editarCategoriaNomeEImagem(
+        categoriaId: String,
+        novoNome: String,
+        novaImagemUri: Uri, // A função deve receber um Uri válido para a nova imagem
+        // Aqui está o parâmetro para a URL da imagem antiga
+        callback: (Boolean) -> Unit
+    ) {
         val userId = auth.currentUser?.uid
         if (userId == null) {
             callback(false) // Usuário não autenticado
+            return
+        }
+
+        val categoriaRef = db.collection("users").document(userId).collection("categorias").document(categoriaId)
+        val storageRef = FirebaseStorage.getInstance().reference.child("users/$userId/categorias/$categoriaId.jpg")
+
+        // Faz o upload da nova imagem para o Firebase Storage
+        storageRef.putFile(novaImagemUri) // Aqui o novaImagemUri é um Uri válido
+            .addOnSuccessListener {
+                // Após o upload, obtemos a URL da nova imagem
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val novaImagemUrl = uri.toString() // A URL da imagem será uma String
+
+                    // Atualiza primeiro a URL da nova imagem no Firestore
+                    val updates = mapOf(
+                        "imagemUrl" to novaImagemUrl // Atualiza a URL da nova imagem
+                    )
+
+                    categoriaRef.update(updates)
+                        .addOnSuccessListener {
+                            // Após a URL ser atualizada, atualiza o nome da categoria
+                            categoriaRef.update("nome", novoNome)
+                                .addOnSuccessListener {
+                                    callback(true) // Atualização bem-sucedida
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w("Firestore", "Erro ao atualizar o nome da categoria.", e)
+                                    callback(false) // Falha na atualização do nome
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("Firestore", "Erro ao atualizar a URL da imagem.", e)
+                            callback(false) // Falha na atualização da URL
+                        }
+                }.addOnFailureListener { e ->
+                    Log.w("Storage", "Erro ao obter a URL da imagem.", e)
+                    callback(false) // Falha ao obter a URL da imagem
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("Storage", "Erro ao fazer upload da imagem.", e)
+                callback(false) // Falha no upload da imagem
+            }
+    }
+
+    fun editarCategoriaImagem(categoriaId: String, novaImagemUri: Uri, imagemAntigaUrl: String, callback: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            callback(false, null) // Usuário não autenticado
             return
         }
 
@@ -184,33 +238,23 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
             .addOnSuccessListener {
                 // Obter a URL da nova imagem
                 storageRef.downloadUrl.addOnSuccessListener { novaImagemUrl ->
-                    val categoriaRef = db.collection("users").document(userId).collection("categorias").document(categoriaId)
-
-                    // Atualizar a URL da imagem no Firestore
-                    val updates = mapOf("imagemUrl" to novaImagemUrl.toString())
-                    categoriaRef.update(updates)
-                        .addOnSuccessListener {
-                            // Excluir a imagem antiga, se necessário
-                            if (novaImagemUrl.toString() != imagemAntigaUrl) {
-                                val storageRefAntiga = FirebaseStorage.getInstance().getReferenceFromUrl(imagemAntigaUrl)
-                                storageRefAntiga.delete()
-                                    .addOnSuccessListener { Log.d("Storage", "Imagem antiga excluída com sucesso.") }
-                                    .addOnFailureListener { e -> Log.w("Storage", "Erro ao excluir a imagem antiga: $imagemAntigaUrl", e) }
-                            }
-                            callback(true)
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w("Firestore", "Erro ao atualizar a imagem da categoria no Firestore.", e)
-                            callback(false)
-                        }
-                }.addOnFailureListener { e ->
-                    Log.w("Storage", "Erro ao obter URL da nova imagem.", e)
-                    callback(false) // Falha ao obter a URL da nova imagem
+                    // Excluir a imagem antiga, se necessário
+                    if (imagemAntigaUrl != novaImagemUrl.toString()) {
+                        val storageRefAntiga = FirebaseStorage.getInstance().getReferenceFromUrl(imagemAntigaUrl)
+                        storageRefAntiga.delete()
+                            .addOnSuccessListener { Log.d("Storage", "Imagem antiga excluída com sucesso.") }
+                            .addOnFailureListener { e -> Log.w("Storage", "Erro ao excluir a imagem antiga: $imagemAntigaUrl", e) }
+                    }
+                    callback(true, novaImagemUrl.toString()) // Retorna a nova URL
                 }
+                    .addOnFailureListener { e ->
+                        Log.w("Storage", "Erro ao obter URL da nova imagem.", e)
+                        callback(false, null) // Falha ao obter a URL da nova imagem
+                    }
             }
             .addOnFailureListener { e ->
                 Log.w("Storage", "Erro ao fazer upload da nova imagem.", e)
-                callback(false) // Falha ao fazer o upload da nova imagem
+                callback(false, null) // Falha ao fazer o upload da nova imagem
             }
     }
 
