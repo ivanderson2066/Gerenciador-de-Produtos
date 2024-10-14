@@ -132,7 +132,7 @@ class BuscaActivity : AppCompatActivity() {
         imageViewInDialog!!.visibility = View.VISIBLE
 
         // Limpar a URI da imagem antes de escolher uma nova
-        imageUri = Uri.parse(categoria.imagemUrl) // Salva a URI atual para futura referência
+        imageUri = null // Resetar imageUri para null, assim sabemos se o usuário escolheu uma nova
 
         buttonEscolherImagem.setOnClickListener {
             escolherImagem() // Chama o método para abrir o seletor de imagens
@@ -141,16 +141,35 @@ class BuscaActivity : AppCompatActivity() {
         builder.setView(viewInflated)
 
         builder.setPositiveButton("Salvar") { _, _ ->
-            val novoNome = editTextNome.text.toString()
-            val novaImagemUri = imageUri ?: Uri.parse(categoria.imagemUrl) // Se imageUri for nulo, mantenha a antiga
+            val novoNome = editTextNome.text.toString().trim()
 
-            dbHelper.editarCategoria(categoria.id, novoNome, novaImagemUri, categoria.imagemUrl) { sucesso ->
+            // Verificar se o nome da categoria foi alterado
+            if (novoNome.isEmpty()) {
+                Toast.makeText(this, "O nome da categoria não pode ser vazio.", Toast.LENGTH_SHORT).show()
+                return@setPositiveButton
+            }
 
-                if (sucesso) {
+            // Atualizar o nome da categoria independentemente do upload da imagem
+            dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
+                if (!sucessoNome) {
+                    Toast.makeText(this, "Erro ao editar o nome da categoria.", Toast.LENGTH_SHORT).show()
+                    return@editarCategoriaNome
+                }
+
+                // Verificar se uma nova imagem foi selecionada e fazer o upload
+                if (imageUri != null) {
+                    dbHelper.editarCategoriaImagem(categoria.id, imageUri!!, categoria.imagemUrl) { sucessoImagem ->
+                        if (sucessoImagem) {
+                            atualizarCategorias()
+                            Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this, "Erro ao editar a imagem da categoria.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    // Se não houve alteração na imagem, apenas atualiza as categorias
                     atualizarCategorias()
                     Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Erro ao editar a categoria.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
