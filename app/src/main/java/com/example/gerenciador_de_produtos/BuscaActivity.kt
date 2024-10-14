@@ -142,9 +142,10 @@ class BuscaActivity : AppCompatActivity() {
 
         builder.setPositiveButton("Salvar") { _, _ ->
             val novoNome = editTextNome.text.toString()
-            val novaImagemUrl = imageUri?.toString() ?: categoria.imagemUrl // Usar a nova imagem se selecionada
+            val novaImagemUri = imageUri ?: Uri.parse(categoria.imagemUrl) // Se imageUri for nulo, mantenha a antiga
 
-            dbHelper.editarCategoria(categoria.id, novoNome, novaImagemUrl, categoria.imagemUrl) { sucesso ->
+            dbHelper.editarCategoria(categoria.id, novoNome, novaImagemUri, categoria.imagemUrl) { sucesso ->
+
                 if (sucesso) {
                     atualizarCategorias()
                     Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()

@@ -148,7 +148,7 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
         }
 }
     // Editar categoria e excluir a imagem antiga
-    fun editarCategoria(categoriaId: String, novoNome: String, novaImagemUrl: String, imagemAntigaUrl: String, callback: (Boolean) -> Unit) {
+    fun editarCategoria(categoriaId: String, novoNome: String, novaImagemUri: Uri, imagemAntigaUrl: String, callback: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid
         if (userId == null) {
             callback(false) // Usuário não autenticado
@@ -157,33 +157,53 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
 
         val categoriaRef = db.collection("users").document(userId).collection("categorias").document(categoriaId)
 
-        // Atualizar a categoria no Firestore com o novo nome e URL da imagem
-        val updates = mapOf(
-            "nome" to novoNome,
-            "imagemUrl" to novaImagemUrl
-        )
+        // Se uma nova imagem foi fornecida, inicia o upload
+        val storageRef = FirebaseStorage.getInstance().getReference("users/$userId/categorias/${categoriaId}.jpg")
 
-        // Atualiza a categoria no Firestore
-        categoriaRef.update(updates)
+        // Fazer o upload da nova imagem
+        storageRef.putFile(novaImagemUri)
             .addOnSuccessListener {
-                // Se a URL da nova imagem for diferente da antiga, exclua a imagem antiga
-                if (novaImagemUrl != imagemAntigaUrl) {
-                    val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imagemAntigaUrl)
+                // Obter a URL da nova imagem
+                storageRef.downloadUrl.addOnSuccessListener { novaImagemUrl ->
+                    // Atualizar a categoria no Firestore com o novo nome e URL da imagem
+                    val updates = mapOf(
+                        "nome" to novoNome,
+                        "imagemUrl" to novaImagemUrl.toString()
+                    )
 
-                    // Exclui a imagem antiga do Firebase Storage
-                    storageRef.delete()
+                    // Atualiza a categoria no Firestore
+                    categoriaRef.update(updates)
                         .addOnSuccessListener {
-                            Log.d("Storage", "Imagem antiga excluída com sucesso.")
+                            // Se a URL da nova imagem for diferente da antiga, exclua a imagem antiga
+                            if (novaImagemUrl.toString() != imagemAntigaUrl) {
+                                val storageRefAntiga = FirebaseStorage.getInstance().getReferenceFromUrl(imagemAntigaUrl)
+
+                                // Exclui a imagem antiga do Firebase Storage
+                                storageRefAntiga.delete()
+                                    .addOnSuccessListener {
+                                        Log.d("Storage", "Imagem antiga excluída com sucesso.")
+                                        callback(true) // Sucesso na edição da categoria e exclusão da imagem antiga
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w("Storage", "Erro ao excluir a imagem antiga: $imagemAntigaUrl", e)
+                                        callback(true) // Mesmo que a exclusão falhe, a edição foi feita com sucesso
+                                    }
+                            } else {
+                                callback(true) // Sucesso na edição da categoria e não há imagem antiga para excluir
+                            }
                         }
                         .addOnFailureListener { e ->
-                            Log.w("Storage", "Erro ao excluir a imagem antiga: $imagemAntigaUrl", e)
+                            Log.w("Firestore", "Erro ao editar a categoria.", e)
+                            callback(false) // Falha ao editar a categoria
                         }
+                }.addOnFailureListener { e ->
+                    Log.w("Storage", "Erro ao obter URL da nova imagem.", e)
+                    callback(false) // Falha ao obter a URL da nova imagem
                 }
-                callback(true) // Sucesso na edição da categoria e exclusão da imagem antiga
             }
             .addOnFailureListener { e ->
-                Log.w("Firestore", "Erro ao editar a categoria.", e)
-                callback(false) // Falha ao editar a categoria
+                Log.w("Storage", "Erro ao fazer upload da nova imagem.", e)
+                callback(false) // Falha ao fazer o upload da nova imagem
             }
     }
 
