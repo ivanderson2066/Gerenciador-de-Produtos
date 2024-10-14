@@ -73,15 +73,15 @@ class ProdutoAdapter(
             holder.validadeTextView.text = "Validade: ${produto.validade}"
         }
 
-// Calcula os limites de 70% e 50% do estoque máximo
+        // Calcula os limites de 70% e 50% do estoque máximo
         val limite70Porcento = produto.estoqueMaximo * 0.70
         val limite50Porcento = produto.estoqueMaximo * 0.50
 
-// Identifica os GIFs
+        // Identifica os GIFs
         val gif50: ImageView = holder.itemView.findViewById(R.id.gif_50)
         val gif75: ImageView = holder.itemView.findViewById(R.id.gif_75)
 
-// Altera a visibilidade dos GIFs de acordo com a quantidade
+        // Altera a visibilidade dos GIFs de acordo com a quantidade
         when {
             produto.quantidade > limite70Porcento -> {
                 // Se a quantidade for acima de 70%, esconder ambos os GIFs
@@ -103,43 +103,28 @@ class ProdutoAdapter(
             }
         }
 
-
         // Configura o clique no botão de Entrada para abrir o diálogo de entrada
         holder.entradaButton.setOnClickListener {
-            // Verifica se o contexto é da MainActivity ou qualquer Activity com os métodos necessários
-            if (context is MainActivity) {
-                context.showEntradaDialog(produto) // Chama o diálogo de entrada na MainActivity
-            }
-        }
-
-        // Configura o clique no botão de Entrada para abrir o diálogo de entrada
-        holder.entradaButton.setOnClickListener {
-            // Verifica se o contexto é da MainActivity ou qualquer Activity com os métodos necessários
-            if (context is BuscaActivity) {
-                context.showEntradaDialog(produto) // Chama o diálogo de entrada na MainActivity
+            when (context) {
+                is MainActivity -> context.showEntradaDialog(produto) // Chama o diálogo de entrada na MainActivity
+                is BuscaActivity -> context.showEntradaDialog(produto) // Chama o diálogo de entrada na BuscaActivity
             }
         }
 
         // Configura o clique no botão de Saída para abrir o diálogo de saída
         holder.saidaButton.setOnClickListener {
-            if (context is MainActivity) {
-                context.showSaidaDialog(produto) // Chama o diálogo de saída na MainActivity
-            }
-        }
-// Configura o clique no botão de Saída para abrir o diálogo de saída
-        holder.saidaButton.setOnClickListener {
-            if (context is BuscaActivity) {
-                // Supondo que Produto tem uma propriedade chamada `categoria` do tipo Categoria
-                val categoriaDoProduto = produto.categoria // ou produto.categoriaId, dependendo da sua estrutura
-                context.showSaidaDialog(produto, categoriaDoProduto) // Passa a categoria junto com o produto
+            when (context) {
+                is MainActivity -> context.showSaidaDialog(produto) // Chama o diálogo de saída na MainActivity
+                is BuscaActivity -> {
+                    // Passa a categoria junto com o produto
+                    val categoriaDoProduto = produto.categoria
+                    context.showSaidaDialog(produto, categoriaDoProduto)
+                }
             }
         }
 
-
-
-        // Adiciona o listener de clique longo
+        // Adiciona o listener de clique longo para exibir o PopupMenu
         holder.itemView.setOnLongClickListener { view ->
-            // Mostra o PopupMenu no local do clique
             val popup = PopupMenu(context, view)
 
             // Inflate o menu
@@ -149,20 +134,23 @@ class ProdutoAdapter(
             popup.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.menu_editar -> {
-                        if (context is MainActivity) {
-                            context.showEditDialog(produto) // Chama o método de edição na MainActivity
+                        when (context) {
+                            is MainActivity -> context.showEditDialog(produto)
+                            is BuscaActivity -> context.showEditDialog(produto)
                         }
                         true
                     }
                     R.id.menu_excluir -> {
-                        if (context is MainActivity) {
-                            context.excluirProduto(produto) // Chama o método de exclusão na MainActivity
+                        when (context) {
+                            is MainActivity -> context.excluirProduto(produto)
+                            is BuscaActivity -> context.excluirProduto(produto)
                         }
                         true
                     }
                     R.id.menu_estoque_maximo -> {
-                        if (context is MainActivity) {
-                            context.showEditStockDialog(produto) // Chama o método para editar estoque máximo
+                        when (context) {
+                            is MainActivity -> context.showEditStockDialog(produto)
+                            is BuscaActivity -> context.showEditStockDialog(produto)
                         }
                         true
                     }
@@ -171,7 +159,7 @@ class ProdutoAdapter(
             }
 
             popup.show() // Mostra o menu no local do view
-            true // Retorna true para indicar que o evento foi tratado
+            true
         }
     }
 

@@ -3,10 +3,12 @@ package com.example.gerenciador_de_produtos
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.SearchView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
 import com.example.gerenciadordeprodutos.R
 import com.google.android.material.textfield.TextInputEditText
 
@@ -368,6 +371,135 @@ class BuscaActivity : AppCompatActivity() {
         } else {
             atualizarCategorias()
         }
+    }
+    fun showEditDialog(produto: Produto) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_product, null)
+        val inputNome: EditText = dialogView.findViewById(R.id.input_nome)
+        val inputValidade: EditText = dialogView.findViewById(R.id.input_validade)
+        val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
+        val spinnerCategoria: Spinner = dialogView.findViewById(R.id.spinner_categoria)
+
+        // Preenche os campos com as informações atuais do produto
+        inputNome.setText(produto.nome)
+        inputValidade.setText(produto.validade)
+        inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
+
+        // Carregar as categorias do banco de dados
+        databaseHelper.obterCategorias { categorias -> // Supondo que este método retorne List<Categoria>
+            // Converter List<Categoria> para List<String>
+            val categoriasString = categorias.map { it.nome } // Aqui você precisa usar a propriedade correta
+
+            // Certifique-se de que as categorias foram carregadas corretamente
+            val categoriasAdaptadas = listOf("Selecione a categoria") + categoriasString
+
+            // Adapter para o Spinner com as categorias
+            val adapter = ArrayAdapter(dialogView.context, android.R.layout.simple_spinner_item, categoriasAdaptadas)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerCategoria.adapter = adapter
+
+            // Seleciona a categoria atual do produto no Spinner
+            val posicaoCategoriaAtual = categoriasString.indexOf(produto.categoria)
+            if (posicaoCategoriaAtual != -1) {
+                spinnerCategoria.setSelection(posicaoCategoriaAtual + 1) // +1 para ignorar "Selecione a categoria"
+            }
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Editar Produto")
+            .setView(dialogView)
+            .setPositiveButton("Salvar", null)
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.show()
+
+        // Configura o botão "Salvar"
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            val novoNome = inputNome.text.toString()
+            val novaValidade = inputValidade.text.toString()
+            val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
+            val novaCategoria = spinnerCategoria.selectedItem as String
+
+            // Valida a data antes de salvar
+            if (novaValidade.isNotEmpty() && !validarDataValidade(novaValidade)) {
+                Toast.makeText(this, "Data de validade inválida! Insira uma data no formato MM/AAAA ou DD/MM/AAAA.", Toast.LENGTH_SHORT).show()
+            } else if (novoEstoqueMaximo == null || novoEstoqueMaximo < produto.quantidade) {
+                Toast.makeText(this, "O novo estoque máximo deve ser maior ou igual à quantidade atual!", Toast.LENGTH_SHORT).show()
+            } else {
+                // Atualiza o produto na base de dados com a nova categoria
+                databaseHelper.atualizarProduto(
+                    produto.copy(
+                        nome = novoNome,
+                        validade = novaValidade,
+                        estoqueMaximo = novoEstoqueMaximo,
+                        categoria = novaCategoria
+                    )
+                ) { sucesso ->
+                    if (sucesso) {
+                        Toast.makeText(this, "Produto atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss() // Fecha o diálogo após a atualização bem-sucedida
+                        atualizarTela() // Atualiza a lista de produtos
+                    } else {
+                        Toast.makeText(this, "Erro ao atualizar produto!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    fun showEditStockDialog(produto: Produto) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_stock, null)
+        val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
+
+        inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Editar Estoque Máximo")
+            .setView(dialogView)
+            .setPositiveButton("Salvar", null)
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
+
+            if (novoEstoqueMaximo == null) {
+                Toast.makeText(this, "Por favor, insira um valor válido.", Toast.LENGTH_SHORT).show()
+            } else if (novoEstoqueMaximo < produto.quantidade) {
+                Toast.makeText(this, "O estoque máximo não pode ser menor que a quantidade atual!", Toast.LENGTH_SHORT).show()
+            } else {
+                databaseHelper.atualizarEstoqueMaximo(produto.id, novoEstoqueMaximo) { sucesso ->
+                    if (sucesso) {
+                        Toast.makeText(this, "Estoque máximo atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                        atualizarTela()
+                    } else {
+                        Toast.makeText(this, "Erro ao atualizar estoque máximo!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    fun excluirProduto(produto: Produto) {
+        AlertDialog.Builder(this)
+            .setTitle("Excluir Produto")
+            .setMessage("Tem certeza que deseja excluir este produto?")
+            .setPositiveButton("Sim") { _, _ ->
+                // Passando também o nome do produto para o método
+                databaseHelper.excluirProduto(produto.id, produto.nome) { sucesso ->
+                    if (sucesso) {
+                        Toast.makeText(this, "Produto excluído com sucesso!", Toast.LENGTH_SHORT).show()
+                        atualizarTela() // Atualiza a lista de produtos
+                    } else {
+                        Toast.makeText(this, "Erro ao excluir produto!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Não", null)
+            .show()
     }
 
     private fun mostrarDialogoExcluirCategoria(categoria: Categoria) {
