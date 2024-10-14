@@ -209,12 +209,20 @@ class CadastrarProdutoActivity : AppCompatActivity() {
                 isFormatting = true
                 val originalString = s.toString()
 
-                // Remover todos os caracteres que não são dígitos e pontos
-                val cleanString = originalString.replace("[^\\d.]".toRegex(), "")
+                // Remover todos os caracteres que não são dígitos
+                val cleanString = originalString.replace("\\D".toRegex(), "")
 
-                // Converter para um número e formatar
+                // Se a string limpa estiver vazia, resetar o campo
+                if (cleanString.isEmpty()) {
+                    etPrecoProduto.setText("")
+                    isFormatting = false
+                    return
+                }
+
+                // Converter para um número e formatar como moeda
                 val parsed: Double? = cleanString.toDoubleOrNull()
                 val formattedString = if (parsed != null) {
+                    // Formatar o número inteiro como moeda sem divisão por 100
                     NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(parsed / 100)
                 } else {
                     ""
