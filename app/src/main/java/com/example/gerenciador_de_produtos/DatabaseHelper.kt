@@ -479,10 +479,12 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
     fun atualizarProduto(produto: Produto, callback: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return
 
+        // Adiciona a categoria ao hashMap
         val produtoData = hashMapOf<String, Any>(
             "nome" to produto.nome,
             "validade" to (produto.validade ?: ""),
-            "estoqueMaximo" to produto.estoqueMaximo
+            "estoqueMaximo" to produto.estoqueMaximo,
+            "categoria" to produto.categoria // Incluindo o campo de categoria
         )
 
         db.collection("users").document(userId).collection("produtos").document(produto.id)
@@ -606,7 +608,6 @@ fun obterProdutosPorNome(nome: String, callback: (List<Produto>) -> Unit) {
             callback(emptyList())
         }
 }
-    // Dentro da classe DatabaseHelper
 
 }
 

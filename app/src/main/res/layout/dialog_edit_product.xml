@@ -54,7 +54,23 @@
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:layout_marginBottom="16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/categoria"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
+        <!-- Spinner para selecionar a Categoria -->
+        <Spinner
+            android:id="@+id/spinner_categoria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:spinnerMode="dropdown"
+            android:prompt="@string/selecione_a_categoria" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

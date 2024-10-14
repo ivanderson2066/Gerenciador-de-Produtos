@@ -105,5 +105,7 @@
     <string name="excluircategoria" />
     <string name="edite_o_nome_da_categoria">edite o nome da categoria</string>
     <string name="carregando">Editando</string>
+    <string name="categoria">Categoria</string>
+    <string name="selecione_a_categoria" />
 
 </resources>

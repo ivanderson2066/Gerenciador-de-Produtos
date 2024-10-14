@@ -12,9 +12,11 @@ import android.view.View
 import android.widget.Button
 import android.animation.ValueAnimator
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupMenu
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -40,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cadastrarProdutoLauncher: ActivityResultLauncher<Intent>
     private var progressoSliceIndex: Int = -1 // Índice da fatia de progresso
     private var restanteSliceIndex: Int = -1 // Índice da fatia restante
+    private lateinit var categorias: MutableList<Categoria> // Defina categorias como uma lista de Categoria
+
     // Declaração do PieChart
     private lateinit var pieChart: PieChart
 
@@ -54,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         profileIcon = findViewById(R.id.profile_icon)
         pieChart = findViewById(R.id.piechart) // Inicializa o PieChart
         mAuth = FirebaseAuth.getInstance()
+        carregarCategorias()
 
         // Inicializa o launcher para o resultado da atividade de cadastro de produtos
         cadastrarProdutoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -90,7 +95,12 @@ class MainActivity : AppCompatActivity() {
             cadastrarProdutoLauncher.launch(intent)
         }
     }
-
+    private fun carregarCategorias() {
+        databaseHelper.obterCategorias { listaCategorias ->
+            categorias = listaCategorias.toMutableList() // Certifique-se de que isso seja uma MutableList
+            // Se precisar atualizar o Adapter em algum lugar, faça isso aqui
+        }
+    }
     private fun showPopupMenu(view: View) {
         val popup = PopupMenu(this, view)
         popup.menuInflater.inflate(R.menu.profile_menu, popup.menu)
@@ -391,30 +401,52 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showEditDialog(produto: Produto) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_product, null) // Layout para edição do produto
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_product, null)
         val inputNome: EditText = dialogView.findViewById(R.id.input_nome)
         val inputValidade: EditText = dialogView.findViewById(R.id.input_validade)
         val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
+        val spinnerCategoria: Spinner = dialogView.findViewById(R.id.spinner_categoria)
 
         // Preenche os campos com as informações atuais do produto
         inputNome.setText(produto.nome)
         inputValidade.setText(produto.validade)
         inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
 
+        // Carregar as categorias do banco de dados
+        databaseHelper.obterCategorias { categorias -> // Supondo que este método retorne List<Categoria>
+            // Converter List<Categoria> para List<String>
+            val categoriasString = categorias.map { it.nome } // Aqui você precisa usar a propriedade correta
+
+            // Certifique-se de que as categorias foram carregadas corretamente
+            val categoriasAdaptadas = listOf("Selecione a categoria") + categoriasString
+
+            // Adapter para o Spinner com as categorias
+            val adapter = ArrayAdapter(dialogView.context, android.R.layout.simple_spinner_item, categoriasAdaptadas)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerCategoria.adapter = adapter
+
+            // Seleciona a categoria atual do produto no Spinner
+            val posicaoCategoriaAtual = categoriasString.indexOf(produto.categoria)
+            if (posicaoCategoriaAtual != -1) {
+                spinnerCategoria.setSelection(posicaoCategoriaAtual + 1) // +1 para ignorar "Selecione a categoria"
+            }
+        }
+
         val dialog = AlertDialog.Builder(this)
             .setTitle("Editar Produto")
             .setView(dialogView)
-            .setPositiveButton("Salvar", null) // Definido como nulo para configurar manualmente depois
+            .setPositiveButton("Salvar", null)
             .setNegativeButton("Cancelar", null)
             .create()
 
         dialog.show()
 
-        // Configura o botão "Salvar" para manter o diálogo aberto se houver erro
+        // Configura o botão "Salvar"
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val novoNome = inputNome.text.toString()
             val novaValidade = inputValidade.text.toString()
             val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
+            val novaCategoria = spinnerCategoria.selectedItem as String
 
             // Valida a data antes de salvar
             if (novaValidade.isNotEmpty() && !validarDataValidade(novaValidade)) {
@@ -422,8 +454,15 @@ class MainActivity : AppCompatActivity() {
             } else if (novoEstoqueMaximo == null || novoEstoqueMaximo < produto.quantidade) {
                 Toast.makeText(this, "O novo estoque máximo deve ser maior ou igual à quantidade atual!", Toast.LENGTH_SHORT).show()
             } else {
-                // Atualiza o produto na base de dados
-                databaseHelper.atualizarProduto(produto.copy(nome = novoNome, validade = novaValidade, estoqueMaximo = novoEstoqueMaximo)) { sucesso ->
+                // Atualiza o produto na base de dados com a nova categoria
+                databaseHelper.atualizarProduto(
+                    produto.copy(
+                        nome = novoNome,
+                        validade = novaValidade,
+                        estoqueMaximo = novoEstoqueMaximo,
+                        categoria = novaCategoria
+                    )
+                ) { sucesso ->
                     if (sucesso) {
                         Toast.makeText(this, "Produto atualizado com sucesso!", Toast.LENGTH_SHORT).show()
                         dialog.dismiss() // Fecha o diálogo após a atualização bem-sucedida
@@ -435,6 +474,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     fun excluirProduto(produto: Produto) {
         AlertDialog.Builder(this)
             .setTitle("Excluir Produto")

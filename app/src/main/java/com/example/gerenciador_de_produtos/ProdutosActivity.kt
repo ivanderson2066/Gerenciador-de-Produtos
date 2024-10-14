@@ -2,9 +2,11 @@ package com.example.gerenciador_de_produtos
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupMenu
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -18,16 +20,17 @@ class ProdutosActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PlanilhaProdutoAdapter
     private val databaseHelper = DatabaseHelper()
+    private lateinit var categorias: MutableList<Categoria> // Defina categorias como uma lista de Categoria
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_produtos)
         val buttonVoltar = findViewById<ImageButton>(R.id.button_voltar)
         buttonVoltar.setOnClickListener { handleOnBackPressed() }
+        carregarCategorias()
 
         recyclerView = findViewById(R.id.produtos_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
-
         carregarProdutos()
     }
 
@@ -46,16 +49,43 @@ class ProdutosActivity : AppCompatActivity() {
             }
         }
     }
-
+    private fun carregarCategorias() {
+        databaseHelper.obterCategorias { listaCategorias ->
+            categorias = listaCategorias.toMutableList() // Certifique-se de que isso seja uma MutableList
+            // Se precisar atualizar o Adapter em algum lugar, faça isso aqui
+        }
+    }
     private fun showEditDialog(produto: Produto) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_product, null)
         val inputNome: EditText = dialogView.findViewById(R.id.input_nome)
         val inputValidade: EditText = dialogView.findViewById(R.id.input_validade)
         val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
+        val spinnerCategoria: Spinner = dialogView.findViewById(R.id.spinner_categoria)
 
+        // Preenche os campos com as informações atuais do produto
         inputNome.setText(produto.nome)
         inputValidade.setText(produto.validade)
         inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
+
+        // Carregar as categorias do banco de dados
+        databaseHelper.obterCategorias { categorias -> // Supondo que este método retorne List<Categoria>
+            // Converter List<Categoria> para List<String>
+            val categoriasString = categorias.map { it.nome } // Aqui você precisa usar a propriedade correta
+
+            // Certifique-se de que as categorias foram carregadas corretamente
+            val categoriasAdaptadas = listOf("Selecione a categoria") + categoriasString
+
+            // Adapter para o Spinner com as categorias
+            val adapter = ArrayAdapter(dialogView.context, android.R.layout.simple_spinner_item, categoriasAdaptadas)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerCategoria.adapter = adapter
+
+            // Seleciona a categoria atual do produto no Spinner
+            val posicaoCategoriaAtual = categoriasString.indexOf(produto.categoria)
+            if (posicaoCategoriaAtual != -1) {
+                spinnerCategoria.setSelection(posicaoCategoriaAtual + 1) // +1 para ignorar "Selecione a categoria"
+            }
+        }
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("Editar Produto")
@@ -66,21 +96,32 @@ class ProdutosActivity : AppCompatActivity() {
 
         dialog.show()
 
+        // Configura o botão "Salvar"
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val novoNome = inputNome.text.toString()
             val novaValidade = inputValidade.text.toString()
             val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
+            val novaCategoria = spinnerCategoria.selectedItem as String
 
+            // Valida a data antes de salvar
             if (novaValidade.isNotEmpty() && !validarDataValidade(novaValidade)) {
-                Toast.makeText(this, "Data de validade inválida!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Data de validade inválida! Insira uma data no formato MM/AAAA ou DD/MM/AAAA.", Toast.LENGTH_SHORT).show()
             } else if (novoEstoqueMaximo == null || novoEstoqueMaximo < produto.quantidade) {
                 Toast.makeText(this, "O novo estoque máximo deve ser maior ou igual à quantidade atual!", Toast.LENGTH_SHORT).show()
             } else {
-                databaseHelper.atualizarProduto(produto.copy(nome = novoNome, validade = novaValidade, estoqueMaximo = novoEstoqueMaximo)) { sucesso ->
+                // Atualiza o produto na base de dados com a nova categoria
+                databaseHelper.atualizarProduto(
+                    produto.copy(
+                        nome = novoNome,
+                        validade = novaValidade,
+                        estoqueMaximo = novoEstoqueMaximo,
+                        categoria = novaCategoria
+                    )
+                ) { sucesso ->
                     if (sucesso) {
                         Toast.makeText(this, "Produto atualizado com sucesso!", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-                        carregarProdutos()
+                        dialog.dismiss() // Fecha o diálogo após a atualização bem-sucedida
+                        carregarProdutos() // Atualiza a lista de produtos
                     } else {
                         Toast.makeText(this, "Erro ao atualizar produto!", Toast.LENGTH_SHORT).show()
                     }
