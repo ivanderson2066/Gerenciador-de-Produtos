@@ -13,7 +13,6 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
 import java.util.Locale
@@ -113,12 +112,30 @@ class ProdutoAdapter(
             }
         }
 
+        // Configura o clique no botão de Entrada para abrir o diálogo de entrada
+        holder.entradaButton.setOnClickListener {
+            // Verifica se o contexto é da MainActivity ou qualquer Activity com os métodos necessários
+            if (context is BuscaActivity) {
+                context.showEntradaDialog(produto) // Chama o diálogo de entrada na MainActivity
+            }
+        }
+
         // Configura o clique no botão de Saída para abrir o diálogo de saída
         holder.saidaButton.setOnClickListener {
             if (context is MainActivity) {
                 context.showSaidaDialog(produto) // Chama o diálogo de saída na MainActivity
             }
         }
+// Configura o clique no botão de Saída para abrir o diálogo de saída
+        holder.saidaButton.setOnClickListener {
+            if (context is BuscaActivity) {
+                // Supondo que Produto tem uma propriedade chamada `categoria` do tipo Categoria
+                val categoriaDoProduto = produto.categoria // ou produto.categoriaId, dependendo da sua estrutura
+                context.showSaidaDialog(produto, categoriaDoProduto) // Passa a categoria junto com o produto
+            }
+        }
+
+
 
         // Adiciona o listener de clique longo
         holder.itemView.setOnLongClickListener { view ->
