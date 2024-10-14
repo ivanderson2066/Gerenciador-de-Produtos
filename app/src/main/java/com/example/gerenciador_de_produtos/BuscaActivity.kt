@@ -30,21 +30,26 @@ class BuscaActivity : AppCompatActivity() {
     private lateinit var produtoAdapter: ProdutoAdapter
 
     private var imageUri: Uri? = null // URI da imagem escolhida
+    private var imageViewInDialog: ImageView? = null // Reference to the ImageView in the dialog
 
     // Launcher para a seleção de imagem
-    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            imageUri = it
-            val imageView = findViewById<ImageView>(R.id.image_preview)
-            imageView.setImageURI(imageUri)
-            imageView.visibility = View.VISIBLE
-            imageView.tag = imageUri.toString() // Salvar a URI da imagem selecionada
+    private val imagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                imageUri = it
+                // Atualiza a imagem no ImageView de preview no diálogo
+                imageViewInDialog?.let { imageView ->
+                    Glide.with(this)
+                        .load(it)
+                        .into(imageView)
+                    imageView.visibility = View.VISIBLE
+                }
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activy_busca) // Corrigido para "activity_busca"
+        setContentView(R.layout.activy_busca)
 
         // Inicializar views
         recyclerViewCategorias = findViewById(R.id.recyclerViewCategorias)
@@ -116,15 +121,18 @@ class BuscaActivity : AppCompatActivity() {
         // Inflate o layout do diálogo
         val viewInflated = layoutInflater.inflate(R.layout.dialog_edit_categoria, null)
         val editTextNome = viewInflated.findViewById<TextInputEditText>(R.id.input_nome_categoria)
-        val imageViewPreview = viewInflated.findViewById<ImageView>(R.id.image_preview)
+        imageViewInDialog = viewInflated.findViewById(R.id.image_preview) // Referenciar a ImageView do diálogo
         val buttonEscolherImagem = viewInflated.findViewById<Button>(R.id.button_escolher_imagem)
 
         // Carregar o nome e a imagem atual da categoria
         editTextNome.setText(categoria.nome)
         Glide.with(this)
             .load(categoria.imagemUrl)
-            .into(imageViewPreview)
-        imageViewPreview.visibility = View.VISIBLE
+            .into(imageViewInDialog!!)
+        imageViewInDialog!!.visibility = View.VISIBLE
+
+        // Limpar a URI da imagem antes de escolher uma nova
+        imageUri = Uri.parse(categoria.imagemUrl) // Salva a URI atual para futura referência
 
         buttonEscolherImagem.setOnClickListener {
             escolherImagem() // Chama o método para abrir o seletor de imagens
@@ -134,9 +142,9 @@ class BuscaActivity : AppCompatActivity() {
 
         builder.setPositiveButton("Salvar") { _, _ ->
             val novoNome = editTextNome.text.toString()
-            val novaImagemUrl = imageViewPreview.tag?.toString() ?: categoria.imagemUrl // Mantém a imagem se nenhuma nova for escolhida
+            val novaImagemUrl = imageUri?.toString() ?: categoria.imagemUrl // Usar a nova imagem se selecionada
 
-            dbHelper.editarCategoria(categoria.id, novoNome, novaImagemUrl) { sucesso ->
+            dbHelper.editarCategoria(categoria.id, novoNome, novaImagemUrl, categoria.imagemUrl) { sucesso ->
                 if (sucesso) {
                     atualizarCategorias()
                     Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()

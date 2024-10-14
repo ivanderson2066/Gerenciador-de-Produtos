@@ -49,92 +49,141 @@ class DatabaseHelper {
                 callback(false)
             }
     }
-    fun excluirCategoria(categoriaId: String, imagemUrl: String, categoriaNome: String, callback: (Boolean) -> Unit) {
+
+    fun excluirCategoria(categoriaId: String, imagemUrl: String?, categoriaNome: String, callback: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid
         if (userId == null) {
             callback(false)  // Usuário não autenticado
-            return  // Saia da função se o usuário não estiver autenticado
+            return
         }
 
         // Verificar se há produtos associados à categoria
         verificarProdutosAssociados(categoriaNome) { podeExcluir ->
             if (podeExcluir) {
-                // Excluir a categoria do Firestore
                 val categoriaRef = db.collection("users").document(userId)
                     .collection("categorias")
                     .document(categoriaId)
 
-                // Criar uma referência para a imagem no Firebase Storage
-                val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imagemUrl)
+                // Verificar se a URL da imagem é válida antes de tentar excluí-la
+                if (!imagemUrl.isNullOrEmpty()) {
+                    try {
+                        // Criar uma referência para a imagem no Firebase Storage
+                        val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imagemUrl)
 
-                // Primeiro, deletar a imagem do Firebase Storage
-                storageRef.delete()
-                    .addOnSuccessListener {
-                        // Se a imagem foi excluída com sucesso, então exclua a categoria do Firestore
-                        categoriaRef.delete()
+                        // Tentar deletar a imagem do Firebase Storage
+                        storageRef.delete()
                             .addOnSuccessListener {
-                                Log.d("Firestore", "Categoria excluída com ID: $categoriaId")
-                                callback(true)  // Sucesso na exclusão
+                                Log.d("Storage", "Imagem excluída com sucesso.")
+                                // Agora excluir a categoria no Firestore
+                                categoriaRef.delete()
+                                    .addOnSuccessListener {
+                                        Log.d("Firestore", "Categoria excluída com sucesso.")
+                                        callback(true) // Categoria excluída com sucesso
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w("Firestore", "Erro ao excluir categoria no Firestore.", e)
+                                        callback(false) // Falha ao excluir categoria no Firestore
+                                    }
                             }
                             .addOnFailureListener { e ->
-                                Log.w("Firestore", "Erro ao excluir categoria: ${e.message}")
-                                callback(false)  // Falha ao excluir a categoria
+                                Log.w("Storage", "Erro ao excluir imagem, continuando a excluir a categoria.", e)
+                                // Excluir a categoria mesmo que a exclusão da imagem falhe
+                                categoriaRef.delete()
+                                    .addOnSuccessListener {
+                                        Log.d("Firestore", "Categoria excluída com sucesso, apesar do erro na imagem.")
+                                        callback(true) // Categoria excluída com sucesso, apesar do erro na imagem
+                                    }
+                                    .addOnFailureListener { firestoreError ->
+                                        Log.w("Firestore", "Erro ao excluir categoria no Firestore.", firestoreError)
+                                        callback(false) // Falha ao excluir categoria no Firestore
+                                    }
+                            }
+                    } catch (e: IllegalArgumentException) {
+                        Log.w("Storage", "URI inválido: $imagemUrl", e)
+                        // Continuar excluindo a categoria mesmo que o URI da imagem seja inválido
+                        categoriaRef.delete()
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "Categoria excluída com sucesso, apesar do URI inválido.")
+                                callback(true) // Categoria excluída com sucesso, apesar do erro na imagem
+                            }
+                            .addOnFailureListener { firestoreError ->
+                                Log.w("Firestore", "Erro ao excluir categoria no Firestore.", firestoreError)
+                                callback(false) // Falha ao excluir categoria no Firestore
                             }
                     }
-                    .addOnFailureListener { e ->
-                        Log.w("FirebaseStorage", "Erro ao excluir a imagem: ${e.message}")
-                        callback(false)  // Falha ao excluir a imagem
-                    }
+                } else {
+                    // Se a URL da imagem for nula ou vazia, exclua apenas a categoria
+                    categoriaRef.delete()
+                        .addOnSuccessListener {
+                            Log.d("Firestore", "Categoria excluída com sucesso.")
+                            callback(true) // Categoria excluída com sucesso
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("Firestore", "Erro ao excluir categoria no Firestore.", e)
+                            callback(false) // Falha ao excluir categoria no Firestore
+                        }
+                }
             } else {
-                Log.w("Excluir Categoria", "Não é possível excluir a categoria porque existem produtos associados.")
-                callback(false) // Não é possível excluir
+                callback(false) // Não é permitido excluir a categoria (há produtos associados)
             }
         }
     }
 
-    fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolean) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return
+private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolean) -> Unit) {
+    val userId = auth.currentUser?.uid ?: return
 
-        // Consultar os produtos associados à categoria
-        db.collection("users").document(userId)
-            .collection("produtos")
-            .whereEqualTo("categoria", categoriaNome) // Supondo que "categoria" é o campo que armazena o nome da categoria
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Se a consulta retornar documentos, isso significa que existem produtos associados
-                    callback(task.result?.isEmpty == true) // Se não houver produtos, retorna true
-                } else {
-                    Log.w("Firestore", "Erro ao verificar produtos: ${task.exception?.message}")
-                    callback(false) // Em caso de erro, não podemos excluir
-                }
+    // Consultar os produtos associados à categoria
+    db.collection("users").document(userId)
+        .collection("produtos")
+        .whereEqualTo("categoria", categoriaNome) // Supondo que "categoria" é o campo que armazena o nome da categoria
+        .get()
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // Se a consulta retornar documentos, isso significa que existem produtos associados
+                callback(task.result?.isEmpty == true) // Se não houver produtos, retorna true
+            } else {
+                Log.w("Firestore", "Erro ao verificar produtos: ${task.exception?.message}")
+                callback(false) // Em caso de erro, não podemos excluir
             }
-    }
-    fun editarCategoria(categoriaId: String, novoNome: String, novaImagemUrl: String?, callback: (Boolean) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return
+        }
+}
+    // Editar categoria e excluir a imagem antiga
+    fun editarCategoria(categoriaId: String, novoNome: String, novaImagemUrl: String, imagemAntigaUrl: String, callback: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            callback(false) // Usuário não autenticado
+            return
+        }
 
-        val categoriaRef = db.collection("users").document(userId)
-            .collection("categorias")
-            .document(categoriaId)
+        val categoriaRef = db.collection("users").document(userId).collection("categorias").document(categoriaId)
 
-        // Atualiza os dados da categoria
-        val categoriaData = hashMapOf<String, Any>(
-            "nome" to novoNome
+        // Atualizar a categoria no Firestore com o novo nome e URL da imagem
+        val updates = mapOf(
+            "nome" to novoNome,
+            "imagemUrl" to novaImagemUrl
         )
 
-        // Se uma nova imagem foi fornecida, atualiza a URL da imagem
-        if (!novaImagemUrl.isNullOrEmpty()) {
-            categoriaData["imagemUrl"] = novaImagemUrl
-        }
-
-        categoriaRef.update(categoriaData)
+        // Atualiza a categoria no Firestore
+        categoriaRef.update(updates)
             .addOnSuccessListener {
-                Log.d("Firestore", "Categoria atualizada com ID: $categoriaId")
-                callback(true) // Sucesso
+                // Se a URL da nova imagem for diferente da antiga, exclua a imagem antiga
+                if (novaImagemUrl != imagemAntigaUrl) {
+                    val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imagemAntigaUrl)
+
+                    // Exclui a imagem antiga do Firebase Storage
+                    storageRef.delete()
+                        .addOnSuccessListener {
+                            Log.d("Storage", "Imagem antiga excluída com sucesso.")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("Storage", "Erro ao excluir a imagem antiga: $imagemAntigaUrl", e)
+                        }
+                }
+                callback(true) // Sucesso na edição da categoria e exclusão da imagem antiga
             }
             .addOnFailureListener { e ->
-                Log.w("Firestore", "Erro ao atualizar categoria: ${e.message}")
-                callback(false) // Falha
+                Log.w("Firestore", "Erro ao editar a categoria.", e)
+                callback(false) // Falha ao editar a categoria
             }
     }
 
