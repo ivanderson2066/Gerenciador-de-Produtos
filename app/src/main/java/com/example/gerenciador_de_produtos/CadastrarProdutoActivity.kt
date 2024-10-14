@@ -3,6 +3,8 @@ package com.example.gerenciador_de_produtos
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -13,6 +15,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
 import com.example.gerenciadordeprodutos.R
+import java.text.NumberFormat
+import java.util.Locale
 
 class CadastrarProdutoActivity : AppCompatActivity() {
 
@@ -20,7 +24,6 @@ class CadastrarProdutoActivity : AppCompatActivity() {
     private var imageUri: Uri? = null // Armazenar a URI da imagem escolhida
     private val categorias = mutableListOf<String>() // Lista de categorias carregada do Firestore
     private var alertDialog: AlertDialog? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,7 +142,6 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         }
     }
 
-
     private fun adicionarNovaCategoria(nomeCategoria: String, imageUri: Uri) {
         // Chama a função do DatabaseHelper para adicionar a categoria com a imagem
         databaseHelper.adicionarCategoria(nomeCategoria, imageUri) { sucesso, mensagem ->
@@ -190,6 +192,42 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         }
 
         // Para o campo Preço Produto
+        etPrecoProduto.addTextChangedListener(object : TextWatcher {
+            private var isFormatting = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Nada a fazer
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Nada a fazer
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isFormatting) return
+
+                isFormatting = true
+                val originalString = s.toString()
+
+                // Remover todos os caracteres que não são dígitos e pontos
+                val cleanString = originalString.replace("[^\\d.]".toRegex(), "")
+
+                // Converter para um número e formatar
+                val parsed: Double? = cleanString.toDoubleOrNull()
+                val formattedString = if (parsed != null) {
+                    NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(parsed / 100)
+                } else {
+                    ""
+                }
+
+                // Atualizar o texto com a formatação
+                etPrecoProduto.setText(formattedString)
+                etPrecoProduto.setSelection(formattedString.length) // Manter o cursor no final
+
+                isFormatting = false
+            }
+        })
+
         etPrecoProduto.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_NEXT) {
                 spCategoriaProduto.requestFocus()
@@ -223,15 +261,13 @@ class CadastrarProdutoActivity : AppCompatActivity() {
             showToast("Quantidade inválida")
             return
         }
-        val preco = findViewById<TextInputEditText>(R.id.et_preco_produto).text.toString().toDoubleOrNull() ?: run {
-            showToast("Preço inválido")
-            return
-        }
+
+        val precoString = findViewById<TextInputEditText>(R.id.et_preco_produto).text.toString() // Captura o preço como string diretamente
+
         val spinnerCategoria = findViewById<Spinner>(R.id.spinner_categoria_produto)
         val categoria = spinnerCategoria.selectedItem.toString()
         val validade = findViewById<TextInputEditText>(R.id.et_validade_produto).text.toString()
 
-        // Se a categoria for "Selecione a categoria", tratamos como string vazia.
         val categoriaFinal = if (categoria == "Selecione a categoria") "" else categoria
 
         // Validação para a data de validade
@@ -242,8 +278,8 @@ class CadastrarProdutoActivity : AppCompatActivity() {
 
         val validadeExibida = validade.ifEmpty { null }
 
-        // Passamos o valor de categoriaFinal (que pode ser string vazia) para o método adicionarProduto
-        databaseHelper.adicionarProduto(nome, quantidade, preco, categoriaFinal, validadeExibida) { sucesso, mensagem ->
+        // Passa o preço como string diretamente
+        databaseHelper.adicionarProduto(nome, quantidade, precoString, categoriaFinal, validadeExibida) { sucesso, mensagem ->
             if (sucesso) {
                 showToast("Produto salvo com sucesso!")
                 setResult(RESULT_OK)

@@ -53,9 +53,9 @@ class ProdutoAdapter(
         holder.nomeTextView.text = produto.nome
         holder.quantidadeTextView.text = "Quantidade: ${produto.quantidade}"
 
-        // Formata o preço para o padrão brasileiro
-        val precoFormatado = String.format(Locale("pt", "BR"), "%.2f", produto.preco).replace(".", ",")
-        holder.precoTextView.text = "Preço: R$$precoFormatado"
+        // Modificando a formatação do preço
+        val preco: String = produto.preco // Certifique-se que preco é um String
+        holder.precoTextView.text = "Preço: R$ $preco" // Mostra diretamente, pois já é String
 
         // Verifica se a categoria é vazia ou nula
         if (produto.categoria.isEmpty()) {

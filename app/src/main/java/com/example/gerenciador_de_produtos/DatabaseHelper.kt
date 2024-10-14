@@ -23,6 +23,7 @@ class DatabaseHelper {
             .addOnSuccessListener { result ->
                 val listaProdutos = mutableListOf<Produto>()
                 for (document in result) {
+                    // Aqui, asseguramos que o campo 'preco' seja tratado como String
                     val produto = document.toObject(Produto::class.java).apply {
                         id = document.id
                     }
@@ -257,6 +258,7 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
                 callback(false, null) // Falha ao fazer o upload da nova imagem
             }
     }
+
     fun atualizarProduto(produto: Produto, callback: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return
 
@@ -284,7 +286,7 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
     }
 
     // Adiciona um produto ao Firestore
-    fun adicionarProduto(nome: String, quantidade: Int, preco: Double, categoria: String, validade: String?, callback: (Boolean, String?) -> Unit) {
+    fun adicionarProduto(nome: String, quantidade: Int, preco: String, categoria: String, validade: String?, callback: (Boolean, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return
 
         // Nome original (como inserido pelo usuário)
@@ -295,30 +297,28 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
 
         // Verifica se já existe um produto com o nome em minúsculas
         db.collection("users").document(userId).collection("produtos")
-            .whereEqualTo("nomeMin", nomeMin)  // Busca pelo campo "nomeMin"
+            .whereEqualTo("nomeMin", nomeMin)
             .get()
             .addOnSuccessListener { result ->
                 if (!result.isEmpty) {
-                    // Se o produto já existe, retorna um erro
                     callback(false, "Produto com este nome já existe.")
                 } else {
-                    // Caso não exista, adiciona o novo produto
+                    // Armazenar o preço exatamente como foi inserido pelo usuário
                     val produtoId = db.collection("users").document(userId).collection("produtos").document().id
                     val produtoData = hashMapOf<String, Any>(
                         "id" to produtoId,
-                        "nome" to nomeOriginal,  // Nome original (como o usuário inseriu)
-                        "nomeMin" to nomeMin,  // Nome em minúsculas para busca
+                        "nome" to nomeOriginal,
+                        "nomeMin" to nomeMin,
                         "quantidade" to quantidade,
-                        "preco" to preco,
+                        "preco" to preco,  // Salva como string formatada sem alterações
                         "categoria" to categoria,
                         "validade" to (validade ?: ""),
-                        "estoqueMaximo" to quantidade // Define o estoque máximo como a quantidade inicial
+                        "estoqueMaximo" to quantidade
                     )
 
                     db.collection("users").document(userId).collection("produtos").document(produtoId)
                         .set(produtoData)
                         .addOnSuccessListener {
-                            // Adiciona um registro no relatório para a entrada do produto
                             adicionarRelatorio(nomeOriginal, "Entrada", quantidade, "Produto adicionado") { sucesso ->
                                 if (sucesso) {
                                     callback(true, null)  // Produto adicionado com sucesso
@@ -328,12 +328,12 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
                             }
                         }
                         .addOnFailureListener { e ->
-                            callback(false, e.message)  // Erro ao adicionar produto
+                            callback(false, e.message)
                         }
                 }
             }
             .addOnFailureListener { e ->
-                callback(false, e.message)  // Erro ao verificar a existência do produto
+                callback(false, e.message)
             }
     }
 

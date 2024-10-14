@@ -54,8 +54,10 @@ class PlanilhaProdutoAdapter(
 
         holder.nomeTextView.text = produto.nome
         holder.quantidadeTextView.text = "Quantidade: ${produto.quantidade}"
-        val precoFormatado = String.format(Locale("pt", "BR"), "%.2f", produto.preco).replace(".", ",")
-        holder.precoTextView.text = "Preço: R$$precoFormatado"
+        // Modificando a formatação do preço
+        val preco: String = produto.preco // Certifique-se que preco é um String
+        holder.precoTextView.text = "Preço: R$ $preco" // Mostra diretamente, pois já é String
+
         holder.categoriaTextView.text = "Categoria: ${produto.categoria.ifEmpty { "Sem Categoria" }}"
 
         if (produto.validade.isNullOrEmpty()) {

@@ -5,7 +5,7 @@ data class Produto(
     val nome: String = "",
     val quantidade: Int = 0,
     var id: String = "",
-    val preco: Double = 0.0,
+    val preco: String = "",
     val categoria: String = "",
     val validade: String? = null,
     val userId: String = "",
