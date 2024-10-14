@@ -184,7 +184,6 @@ class BuscaActivity : AppCompatActivity() {
             }
         }
 
-        // Configurar o botão "Cancelar"
         // Configurar o TextView "Cancelar"
         textCancelar.setOnClickListener {
             dialogInstance.dismiss() // Fecha o diálogo ao clicar em "Cancelar"
