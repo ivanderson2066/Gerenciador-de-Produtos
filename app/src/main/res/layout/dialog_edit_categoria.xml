@@ -47,7 +47,25 @@
         android:layout_gravity="center_horizontal" />
 
     <!-- Botão de Confirmar -->
-
+    <Button
+        android:id="@+id/button_confirmar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/confirmar"
+        android:backgroundTint="@color/black"
+        android:textColor="@android:color/white"
+        android:layout_gravity="center_horizontal" />
     <!-- Texto clicável para Cancelar -->
-
+    <TextView
+        android:id="@+id/text_cancelar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/cancelar"
+        android:textColor="@color/red"
+        android:layout_gravity="end"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true" />
 </LinearLayout>

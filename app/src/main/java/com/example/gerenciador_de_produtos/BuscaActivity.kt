@@ -113,7 +113,6 @@ class BuscaActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun mostrarDialogoEditarCategoria(categoria: Categoria) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Editar Categoria")
@@ -121,8 +120,10 @@ class BuscaActivity : AppCompatActivity() {
         // Inflate o layout do diálogo
         val viewInflated = layoutInflater.inflate(R.layout.dialog_edit_categoria, null)
         val editTextNome = viewInflated.findViewById<TextInputEditText>(R.id.input_nome_categoria)
-        imageViewInDialog = viewInflated.findViewById(R.id.image_preview) // Referenciar a ImageView do diálogo
+        imageViewInDialog = viewInflated.findViewById(R.id.image_preview)
         val buttonEscolherImagem = viewInflated.findViewById<Button>(R.id.button_escolher_imagem)
+        val buttonConfirmar = viewInflated.findViewById<Button>(R.id.button_confirmar)
+        val textCancelar = viewInflated.findViewById<TextView>(R.id.text_cancelar) // Referenciar o TextView
 
         // Carregar o nome e a imagem atual da categoria
         editTextNome.setText(categoria.nome)
@@ -131,7 +132,7 @@ class BuscaActivity : AppCompatActivity() {
             .into(imageViewInDialog!!)
         imageViewInDialog!!.visibility = View.VISIBLE
 
-        // Resetar imageUri para null, assim sabemos se o usuário escolheu uma nova imagem
+        // Resetar imageUri para null
         imageUri = null
 
         buttonEscolherImagem.setOnClickListener {
@@ -140,29 +141,28 @@ class BuscaActivity : AppCompatActivity() {
 
         builder.setView(viewInflated)
 
-        builder.setPositiveButton("Salvar") { _, _ ->
+        // Criar o diálogo e exibi-lo
+        val dialogInstance = builder.create() // Renomeie a variável aqui
+
+        // Configurar o botão "Confirmar"
+        buttonConfirmar.setOnClickListener {
             val novoNome = editTextNome.text.toString().trim()
 
             // Verificar se o nome da categoria foi alterado
             if (novoNome.isEmpty()) {
                 Toast.makeText(this, "O nome da categoria não pode ser vazio.", Toast.LENGTH_SHORT).show()
-                return@setPositiveButton
+                return@setOnClickListener
             }
 
             // Se a imagem foi alterada, realiza o upload primeiro
             if (imageUri != null) {
-                // Chama o método de editar a categoria com a nova imagem (Uri)
-                dbHelper.editarCategoriaImagem(categoria.id, imageUri!!,
-                    categoria.imagemUrl
-                ) { sucessoImagem, _ ->
+                dbHelper.editarCategoriaImagem(categoria.id, imageUri!!, categoria.imagemUrl) { sucessoImagem, _ ->
                     if (sucessoImagem) {
-                        // Aqui você chama a função para editar o nome e a nova imagem
-                        dbHelper.editarCategoriaNomeEImagem(
-                            categoria.id, novoNome, imageUri!!
-                        ) { sucesso ->
+                        dbHelper.editarCategoriaNomeEImagem(categoria.id, novoNome, imageUri!!) { sucesso ->
                             if (sucesso) {
                                 atualizarCategorias()
                                 Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                                dialogInstance.dismiss() // Fecha o diálogo após a confirmação
                             } else {
                                 Toast.makeText(this, "Erro ao editar a categoria.", Toast.LENGTH_SHORT).show()
                             }
@@ -172,11 +172,11 @@ class BuscaActivity : AppCompatActivity() {
                     }
                 }
             } else {
-                // Se a imagem não foi alterada, apenas atualiza o nome
                 dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
                     if (sucessoNome) {
                         atualizarCategorias()
                         Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                        dialogInstance.dismiss() // Fecha o diálogo após a confirmação
                     } else {
                         Toast.makeText(this, "Erro ao editar o nome da categoria.", Toast.LENGTH_SHORT).show()
                     }
@@ -184,9 +184,14 @@ class BuscaActivity : AppCompatActivity() {
             }
         }
 
-        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-        builder.show()
+        // Configurar o botão "Cancelar"
+        // Configurar o TextView "Cancelar"
+        textCancelar.setOnClickListener {
+            dialogInstance.dismiss() // Fecha o diálogo ao clicar em "Cancelar"
+        }
+        dialogInstance.show() // Exibe o diálogo
     }
+
     private fun escolherImagem() {
         // Inicia a escolha da imagem da galeria
         imagePickerLauncher.launch("image/*")
