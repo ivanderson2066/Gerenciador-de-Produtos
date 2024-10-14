@@ -29,7 +29,6 @@ class BuscaActivity : AppCompatActivity() {
     private lateinit var textViewCategorias: TextView
     private lateinit var textViewProdutos: TextView
     private val databaseHelper = DatabaseHelper()
-    private lateinit var categorias: MutableList<Categoria>
     private lateinit var dbHelper: DatabaseHelper
     private lateinit var categoriaAdapter: CategoryAdapter
     private lateinit var produtoAdapter: ProdutoAdapter
