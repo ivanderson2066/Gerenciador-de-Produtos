@@ -123,7 +123,7 @@ class BuscaActivity : AppCompatActivity() {
         imageViewInDialog = viewInflated.findViewById(R.id.image_preview)
         val buttonEscolherImagem = viewInflated.findViewById<Button>(R.id.button_escolher_imagem)
         val buttonConfirmar = viewInflated.findViewById<Button>(R.id.button_confirmar)
-        val textCancelar = viewInflated.findViewById<TextView>(R.id.text_cancelar) // Referenciar o TextView
+        val textCancelar = viewInflated.findViewById<TextView>(R.id.text_cancelar)
 
         // Carregar o nome e a imagem atual da categoria
         editTextNome.setText(categoria.nome)
@@ -142,7 +142,7 @@ class BuscaActivity : AppCompatActivity() {
         builder.setView(viewInflated)
 
         // Criar o diálogo e exibi-lo
-        val dialogInstance = builder.create() // Renomeie a variável aqui
+        val dialogInstance = builder.create()
 
         // Configurar o botão "Confirmar"
         buttonConfirmar.setOnClickListener {
@@ -154,11 +154,20 @@ class BuscaActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Mostrar a tela de carregamento
+            val loadingDialog = AlertDialog.Builder(this)
+                .setView(layoutInflater.inflate(R.layout.dialog_loading, null))
+                .setCancelable(false) // Impede o cancelamento ao tocar fora
+                .create()
+
+            loadingDialog.show() // Mostra o diálogo de carregamento
+
             // Se a imagem foi alterada, realiza o upload primeiro
             if (imageUri != null) {
                 dbHelper.editarCategoriaImagem(categoria.id, imageUri!!, categoria.imagemUrl) { sucessoImagem, _ ->
                     if (sucessoImagem) {
                         dbHelper.editarCategoriaNomeEImagem(categoria.id, novoNome, imageUri!!) { sucesso ->
+                            loadingDialog.dismiss() // Fecha o diálogo de carregamento
                             if (sucesso) {
                                 atualizarCategorias()
                                 Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
@@ -168,11 +177,13 @@ class BuscaActivity : AppCompatActivity() {
                             }
                         }
                     } else {
+                        loadingDialog.dismiss() // Fecha o diálogo de carregamento
                         Toast.makeText(this, "Erro ao fazer o upload da imagem.", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
                 dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
+                    loadingDialog.dismiss() // Fecha o diálogo de carregamento
                     if (sucessoNome) {
                         atualizarCategorias()
                         Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
@@ -188,6 +199,7 @@ class BuscaActivity : AppCompatActivity() {
         textCancelar.setOnClickListener {
             dialogInstance.dismiss() // Fecha o diálogo ao clicar em "Cancelar"
         }
+
         dialogInstance.show() // Exibe o diálogo
     }
 
