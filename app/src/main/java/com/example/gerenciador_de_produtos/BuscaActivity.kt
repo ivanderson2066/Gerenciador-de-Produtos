@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.SearchView
 import android.widget.Spinner
@@ -145,8 +146,11 @@ class BuscaActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            val frameLayout = FrameLayout(this) // Cria um FrameLayout temporário
+            val view = layoutInflater.inflate(R.layout.dialog_loading, frameLayout, false) // Infla o layout com o FrameLayout como root
+
             val loadingDialog = AlertDialog.Builder(this)
-                .setView(layoutInflater.inflate(R.layout.dialog_loading, null))
+                .setView(view) // Usa a view inflada
                 .setCancelable(false)
                 .create()
 
