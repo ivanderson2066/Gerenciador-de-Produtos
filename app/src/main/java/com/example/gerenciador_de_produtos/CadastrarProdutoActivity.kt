@@ -362,11 +362,38 @@ class CadastrarProdutoActivity : AppCompatActivity() {
 
     object Utils {
         fun validarDataValidade(data: String): Boolean {
-            val padrao1 = "^\\d{2}/\\d{4}$".toRegex()
-            val padrao2 = "^\\d{2}/\\d{2}/\\d{4}$".toRegex()
-            return padrao1.matches(data) || padrao2.matches(data)
+            // Regex para os formatos MM/AAAA e DD/MM/AAAA
+            val padraoMMYYYY = "^\\d{2}/\\d{4}$".toRegex()  // Formato MM/AAAA
+            val padraoDDMMYYYY = "^\\d{2}/\\d{2}/\\d{4}$".toRegex()  // Formato DD/MM/AAAA
+
+            // Verifica o formato MM/AAAA
+            if (padraoMMYYYY.matches(data)) {
+                val mes = data.substring(0, 2).toIntOrNull()  // Extrai o mês
+
+                // Validar se o mês está entre 1 e 12
+                if (mes != null && mes in 1..12) {
+                    return true  // Data válida no formato MM/AAAA
+                }
+                return false  // Mês inválido
+            }
+
+            // Verifica o formato DD/MM/AAAA
+            if (padraoDDMMYYYY.matches(data)) {
+                val dia = data.substring(0, 2).toIntOrNull()  // Extrai o dia
+                val mes = data.substring(3, 5).toIntOrNull()  // Extrai o mês
+
+                // Validar mês e dia
+                if (mes != null && mes in 1..12 && dia != null && dia in 1..31) {
+                    return true  // Data válida no formato DD/MM/AAAA
+                }
+                return false  // Dia ou mês inválido
+            }
+
+            // Se não for nenhum dos formatos aceitos
+            return false
         }
     }
+
 
     private fun showToast(mensagem: String) {
         Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show()
