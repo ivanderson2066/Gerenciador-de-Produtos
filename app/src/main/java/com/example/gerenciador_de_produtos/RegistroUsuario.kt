@@ -37,9 +37,18 @@ class RegistroUsuario(private val listaDeUsuarios: MutableList<UsuarioCadastroOb
                         val db = FirebaseFirestore.getInstance()
                         val usersCollection = db.collection("users")
 
-                        // Cria um documento para o usuário no Firestore
+                        // Salva as informações dentro da coleção "infoUser"
                         if (userId != null) {
-                            usersCollection.document(userId).set(novoUsuario)
+                            val userInfo = mapOf(
+                                "email" to email,
+                                "numero" to numero
+                            )
+
+                            // Salva as informações dentro da coleção "infoUser"
+                            usersCollection.document(userId)
+                                .collection("infoUser")
+                                .document("info") // Se quiser, você pode usar um ID diferente para o documento
+                                .set(userInfo)
                                 .addOnCompleteListener { firestoreTask ->
                                     if (firestoreTask.isSuccessful) {
                                         Toast.makeText(context, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show()
