@@ -103,7 +103,9 @@
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
             android:hint="@string/pre_o_do_produto"
- />
+            android:imeOptions="actionDone"
+
+            />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Campo Categoria - Spinner -->
@@ -145,6 +147,7 @@
             android:hint="@string/validade_do_produto"
             android:inputType="text"
             android:singleLine="true"
+            android:maxLength="10"
             android:imeOptions="actionDone"
             />
     </com.google.android.material.textfield.TextInputLayout>
