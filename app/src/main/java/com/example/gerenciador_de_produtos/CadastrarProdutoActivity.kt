@@ -103,7 +103,11 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         // Configurar o clique do botão "Confirmar"
         buttonConfirmar.setOnClickListener {
             val nomeCategoria = input.text.toString().trim()
-            if (nomeCategoria.isNotEmpty() && imageUri != null) {
+
+            // Verifica se o nome já existe na lista de categorias, ignorando maiúsculas e minúsculas
+            if (categorias.any { it.equals(nomeCategoria, ignoreCase = true) }) {
+                showToast("Essa categoria já existe! Escolha outro nome.")
+            } else if (nomeCategoria.isNotEmpty() && imageUri != null) {
                 categorias.add(nomeCategoria)
                 adicionarNovaCategoria(nomeCategoria, imageUri!!)  // Adiciona a categoria no Firestore com imagem
                 // Fechar o diálogo após o cadastro bem-sucedido
