@@ -107,8 +107,12 @@ class ProdutosActivity : AppCompatActivity() {
                     if (sb.length == maskMMYYYY.length) { // MM/AAAA
                         val mes = sb.substring(0, 2).toIntOrNull()
                         val ano = sb.substring(3, 7).toIntOrNull()
+                        val dia = sb.substring(0, 2).toIntOrNull()
 
-                        if (mes == null || mes !in 1..12) {
+                        if (dia == null || dia !in 1..31) {
+                            inputValidade.error = "Dia inválido! Insira um valor entre 01 e 31."
+                        }
+                    else if (mes == null || mes !in 1..12) {
                             inputValidade.error = "Mês inválido! Insira um valor entre 01 e 12."
                         } else if (ano == null || ano.toString().length != 4) {
                             inputValidade.error = "Ano inválido! Insira um ano com 4 dígitos."
