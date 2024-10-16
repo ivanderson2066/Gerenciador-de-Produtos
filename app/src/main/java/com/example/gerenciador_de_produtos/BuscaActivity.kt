@@ -148,43 +148,53 @@ class BuscaActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val frameLayout = FrameLayout(this) // Cria um FrameLayout temporário
-            val view = layoutInflater.inflate(R.layout.dialog_loading, frameLayout, false) // Infla o layout com o FrameLayout como root
+            // Verificação de duplicidade (ignora maiúsculas/minúsculas) para garantir que o nome não exista em outra categoria
+            dbHelper.obterCategorias { categorias ->
+                val existeDuplicata = categorias.any { it.nome.equals(novoNome, ignoreCase = true) && it.id != categoria.id }
 
-            val loadingDialog = AlertDialog.Builder(this)
-                .setView(view) // Usa a view inflada
-                .setCancelable(false)
-                .create()
-
-            loadingDialog.show()
-
-            if (imageUri != null) {
-                dbHelper.editarCategoriaImagem(categoria.id, imageUri!!, categoria.imagemUrl) { sucessoImagem, _ ->
-                    if (sucessoImagem) {
-                        dbHelper.editarCategoriaNomeEImagem(categoria.id, novoNome, imageUri!!) { sucesso ->
-                            loadingDialog.dismiss()
-                            if (sucesso) {
-                                atualizarCategorias()
-                                Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
-                                dialogInstance.dismiss()
-                            } else {
-                                Toast.makeText(this, "Erro ao editar a categoria.", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    } else {
-                        loadingDialog.dismiss()
-                        Toast.makeText(this, "Erro ao fazer o upload da imagem.", Toast.LENGTH_SHORT).show()
-                    }
+                if (existeDuplicata) {
+                    Toast.makeText(this, "Essa categoria já existe! Escolha outro nome.", Toast.LENGTH_SHORT).show()
+                    return@obterCategorias
                 }
-            } else {
-                dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
-                    loadingDialog.dismiss()
-                    if (sucessoNome) {
-                        atualizarCategorias()
-                        Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
-                        dialogInstance.dismiss()
-                    } else {
-                        Toast.makeText(this, "Erro ao editar o nome da categoria.", Toast.LENGTH_SHORT).show()
+
+                val frameLayout = FrameLayout(this) // Cria um FrameLayout temporário
+                val view = layoutInflater.inflate(R.layout.dialog_loading, frameLayout, false) // Infla o layout com o FrameLayout como root
+
+                val loadingDialog = AlertDialog.Builder(this)
+                    .setView(view) // Usa a view inflada
+                    .setCancelable(false)
+                    .create()
+
+                loadingDialog.show()
+
+                if (imageUri != null) {
+                    dbHelper.editarCategoriaImagem(categoria.id, imageUri!!, categoria.imagemUrl) { sucessoImagem, _ ->
+                        if (sucessoImagem) {
+                            dbHelper.editarCategoriaNomeEImagem(categoria.id, novoNome, imageUri!!) { sucesso ->
+                                loadingDialog.dismiss()
+                                if (sucesso) {
+                                    atualizarCategorias()
+                                    Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    dialogInstance.dismiss()
+                                } else {
+                                    Toast.makeText(this, "Erro ao editar a categoria.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } else {
+                            loadingDialog.dismiss()
+                            Toast.makeText(this, "Erro ao fazer o upload da imagem.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
+                        loadingDialog.dismiss()
+                        if (sucessoNome) {
+                            atualizarCategorias()
+                            Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
+                            dialogInstance.dismiss()
+                        } else {
+                            Toast.makeText(this, "Erro ao editar o nome da categoria.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
