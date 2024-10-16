@@ -36,4 +36,13 @@
     <item name="image_preview" type="id" />
     <item name="button_confirmar" type="id" />
     <item name="fab_filtrar_data" type="id" />
+    <item name="main" type="id" />
+    <item name="back_arrrowPage" type="id" />
+    <item name="imageView" type="id" />
+    <item name="textNovoUsuario" type="id" />
+    <item name="editTextTextEmailAddress" type="id" />
+    <item name="editTextPhone" type="id" />
+    <item name="editTextTextPassword" type="id" />
+    <item name="editTextTextPasswordRepeat" type="id" />
+    <item name="button_cadastro" type="id" />
 </resources>
