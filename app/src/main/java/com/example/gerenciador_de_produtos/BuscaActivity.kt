@@ -2,6 +2,8 @@ package com.example.gerenciador_de_produtos
 
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -384,8 +386,71 @@ class BuscaActivity : AppCompatActivity() {
 
         // Preenche os campos com as informações atuais do produto
         inputNome.setText(produto.nome)
-        inputValidade.setText(produto.validade)
         inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
+        // Adiciona o TextWatcher para formatar o campo de validade automaticamente e validar (MM/AAAA ou DD/MM/AAAA)
+        inputValidade.addTextChangedListener(object : TextWatcher {
+            private var isUpdating = false
+            private val maskMMYYYY = "##/####"  // Formato MM/AAAA
+            private val maskDDMMYYYY = "##/##/####"  // Formato DD/MM/AAAA
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isUpdating) return
+
+                val unmasked = s.toString().replace(Regex("\\D"), "")
+                val sb = StringBuilder()
+                var i = 0
+                val mask = if (unmasked.length > 6) maskDDMMYYYY else maskMMYYYY
+
+                for (m in mask.toCharArray()) {
+                    if (m != '#' && i < unmasked.length) {
+                        sb.append(m)
+                        continue
+                    }
+                    if (i >= unmasked.length) break
+                    sb.append(unmasked[i])
+                    i++
+                }
+
+                isUpdating = true
+                inputValidade.setText(sb.toString())
+                inputValidade.setSelection(sb.length)  // Ajusta a posição do cursor
+                isUpdating = false
+
+                // Validação para MM/AAAA ou DD/MM/AAAA
+                if (sb.length == maskMMYYYY.length || sb.length == maskDDMMYYYY.length) {
+                    if (sb.length == maskMMYYYY.length) { // MM/AAAA
+                        val mes = sb.substring(0, 2).toIntOrNull()
+                        val ano = sb.substring(3, 7).toIntOrNull()
+
+                        if (mes == null || mes !in 1..12) {
+                            inputValidade.error = "Mês inválido! Insira um valor entre 01 e 12."
+                        } else if (ano == null || ano.toString().length != 4) {
+                            inputValidade.error = "Ano inválido! Insira um ano com 4 dígitos."
+                        } else {
+                            inputValidade.error = null // Limpa o erro se for válido
+                        }
+                    } else if (sb.length == maskDDMMYYYY.length) { // DD/MM/AAAA
+                        val dia = sb.substring(0, 2).toIntOrNull()
+                        val mes = sb.substring(3, 5).toIntOrNull()
+                        val ano = sb.substring(6, 10).toIntOrNull()
+
+                        if (dia == null || dia !in 1..31) {
+                            inputValidade.error = "Dia inválido! Insira um valor entre 01 e 31."
+                        } else if (mes == null || mes !in 1..12) {
+                            inputValidade.error = "Mês inválido! Insira um valor entre 01 e 12."
+                        } else if (ano == null || ano.toString().length != 4) {
+                            inputValidade.error = "Ano inválido! Insira um ano com 4 dígitos."
+                        } else {
+                            inputValidade.error = null // Limpa o erro se for válido
+                        }
+                    }
+                }
+            }
+        })
 
         // Carregar as categorias do banco de dados
         databaseHelper.obterCategorias { categorias -> // Supondo que este método retorne List<Categoria>

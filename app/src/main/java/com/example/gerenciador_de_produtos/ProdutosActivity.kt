@@ -1,6 +1,8 @@
 package com.example.gerenciador_de_produtos
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -67,23 +69,83 @@ class ProdutosActivity : AppCompatActivity() {
         inputValidade.setText(produto.validade)
         inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
 
-        // Carregar as categorias do banco de dados
-        databaseHelper.obterCategorias { categorias -> // Supondo que este método retorne List<Categoria>
-            // Converter List<Categoria> para List<String>
-            val categoriasString = categorias.map { it.nome } // Aqui você precisa usar a propriedade correta
+        // Adiciona o TextWatcher para formatar o campo de validade automaticamente e validar (MM/AAAA ou DD/MM/AAAA)
+        inputValidade.addTextChangedListener(object : TextWatcher {
+            private var isUpdating = false
+            private val maskMMYYYY = "##/####"  // Formato MM/AAAA
+            private val maskDDMMYYYY = "##/##/####"  // Formato DD/MM/AAAA
 
-            // Certifique-se de que as categorias foram carregadas corretamente
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isUpdating) return
+
+                val unmasked = s.toString().replace(Regex("\\D"), "")
+                val sb = StringBuilder()
+                var i = 0
+                val mask = if (unmasked.length > 6) maskDDMMYYYY else maskMMYYYY
+
+                for (m in mask.toCharArray()) {
+                    if (m != '#' && i < unmasked.length) {
+                        sb.append(m)
+                        continue
+                    }
+                    if (i >= unmasked.length) break
+                    sb.append(unmasked[i])
+                    i++
+                }
+
+                isUpdating = true
+                inputValidade.setText(sb.toString())
+                inputValidade.setSelection(sb.length)  // Ajusta a posição do cursor
+                isUpdating = false
+
+                // Validação para MM/AAAA ou DD/MM/AAAA
+                if (sb.length == maskMMYYYY.length || sb.length == maskDDMMYYYY.length) {
+                    if (sb.length == maskMMYYYY.length) { // MM/AAAA
+                        val mes = sb.substring(0, 2).toIntOrNull()
+                        val ano = sb.substring(3, 7).toIntOrNull()
+
+                        if (mes == null || mes !in 1..12) {
+                            inputValidade.error = "Mês inválido! Insira um valor entre 01 e 12."
+                        } else if (ano == null || ano.toString().length != 4) {
+                            inputValidade.error = "Ano inválido! Insira um ano com 4 dígitos."
+                        } else {
+                            inputValidade.error = null // Limpa o erro se for válido
+                        }
+                    } else if (sb.length == maskDDMMYYYY.length) { // DD/MM/AAAA
+                        val dia = sb.substring(0, 2).toIntOrNull()
+                        val mes = sb.substring(3, 5).toIntOrNull()
+                        val ano = sb.substring(6, 10).toIntOrNull()
+
+                        if (dia == null || dia !in 1..31) {
+                            inputValidade.error = "Dia inválido! Insira um valor entre 01 e 31."
+                        } else if (mes == null || mes !in 1..12) {
+                            inputValidade.error = "Mês inválido! Insira um valor entre 01 e 12."
+                        } else if (ano == null || ano.toString().length != 4) {
+                            inputValidade.error = "Ano inválido! Insira um ano com 4 dígitos."
+                        } else {
+                            inputValidade.error = null // Limpa o erro se for válido
+                        }
+                    }
+                }
+            }
+        })
+
+        // Carregar as categorias do banco de dados
+        databaseHelper.obterCategorias { categorias ->
+            val categoriasString = categorias.map { it.nome }
             val categoriasAdaptadas = listOf("Selecione a categoria") + categoriasString
 
-            // Adapter para o Spinner com as categorias
             val adapter = ArrayAdapter(dialogView.context, android.R.layout.simple_spinner_item, categoriasAdaptadas)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerCategoria.adapter = adapter
 
-            // Seleciona a categoria atual do produto no Spinner
             val posicaoCategoriaAtual = categoriasString.indexOf(produto.categoria)
             if (posicaoCategoriaAtual != -1) {
-                spinnerCategoria.setSelection(posicaoCategoriaAtual + 1) // +1 para ignorar "Selecione a categoria"
+                spinnerCategoria.setSelection(posicaoCategoriaAtual + 1)
             }
         }
 
@@ -96,20 +158,17 @@ class ProdutosActivity : AppCompatActivity() {
 
         dialog.show()
 
-        // Configura o botão "Salvar"
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val novoNome = inputNome.text.toString()
             val novaValidade = inputValidade.text.toString()
             val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
             val novaCategoria = spinnerCategoria.selectedItem as String
 
-            // Valida a data antes de salvar
             if (novaValidade.isNotEmpty() && !validarDataValidade(novaValidade)) {
                 Toast.makeText(this, "Data de validade inválida! Insira uma data no formato MM/AAAA ou DD/MM/AAAA.", Toast.LENGTH_SHORT).show()
             } else if (novoEstoqueMaximo == null || novoEstoqueMaximo < produto.quantidade) {
                 Toast.makeText(this, "O novo estoque máximo deve ser maior ou igual à quantidade atual!", Toast.LENGTH_SHORT).show()
             } else {
-                // Atualiza o produto na base de dados com a nova categoria
                 databaseHelper.atualizarProduto(
                     produto.copy(
                         nome = novoNome,
@@ -120,8 +179,8 @@ class ProdutosActivity : AppCompatActivity() {
                 ) { sucesso ->
                     if (sucesso) {
                         Toast.makeText(this, "Produto atualizado com sucesso!", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss() // Fecha o diálogo após a atualização bem-sucedida
-                        carregarProdutos() // Atualiza a lista de produtos
+                        dialog.dismiss()
+                        carregarProdutos()
                     } else {
                         Toast.makeText(this, "Erro ao atualizar produto!", Toast.LENGTH_SHORT).show()
                     }

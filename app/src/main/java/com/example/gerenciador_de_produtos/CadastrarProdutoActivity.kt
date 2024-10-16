@@ -1,10 +1,12 @@
 package com.example.gerenciador_de_produtos
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
@@ -193,13 +195,9 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         etPrecoProduto.addTextChangedListener(object : TextWatcher {
             private var isFormatting = false
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Nada a fazer
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Nada a fazer
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
                 if (isFormatting) return
@@ -250,75 +248,81 @@ class CadastrarProdutoActivity : AppCompatActivity() {
             }
         }
 
-
+        // Para o campo Validade Produto
         etValidadeProduto.addTextChangedListener(object : TextWatcher {
-            private var isUpdating = false
+            private var isFormatting = false
+            private val maskMMYYYY = "##/####"  // Formato MM/AAAA
+            private val maskDDMMYYYY = "##/##/####"  // Formato DD/MM/AAAA
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Nada a fazer antes da alteração
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Nada a fazer durante a alteração
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
-                if (isUpdating) return
+                if (isFormatting) return
 
-                isUpdating = true
-
-                // Remover caracteres não numéricos
-                val cleanString = s.toString().replace("\\D".toRegex(), "")
-
-                // Aplicar a máscara de acordo com o tamanho da string limpa
-                val formatted = when (cleanString.length) {
-                    in 1..4 -> applyMonthYearMask(cleanString)  // Aplica o formato MM/AAAA
-                    in 5..8 -> applyDayMonthYearMask(cleanString) // Aplica o formato DD/MM/AAAA
-                    else -> cleanString // Se for maior que 8 dígitos, não faz nada
-                }
-
-                // Atualizar o campo de texto com a data formatada
-                etValidadeProduto.setText(formatted)
-                etValidadeProduto.setSelection(formatted.length) // Mover o cursor para o final do texto
-
-                isUpdating = false
-            }
-
-            // Função para aplicar a máscara de mês/ano
-            private fun applyMonthYearMask(cleanString: String): String {
+                val originalString = s.toString()
+                val unmasked = originalString.replace(Regex("\\D"), "")
                 val sb = StringBuilder()
-                if (cleanString.length >= 2) {
-                    sb.append(cleanString.substring(0, 2)) // Mês
-                    if (cleanString.length > 2) {
-                        sb.append("/")
-                        sb.append(cleanString.substring(2)) // Ano
-                    }
-                } else {
-                    sb.append(cleanString) // Apenas parte do mês
-                }
-                return sb.toString()
-            }
 
-            // Função para aplicar a máscara de dia/mês/ano
-            private fun applyDayMonthYearMask(cleanString: String): String {
-                val sb = StringBuilder()
-                if (cleanString.length >= 2) {
-                    sb.append(cleanString.substring(0, 2)) // Dia
-                    if (cleanString.length > 2) {
-                        sb.append("/")
-                        sb.append(cleanString.substring(2, 4)) // Mês
+                var i = 0
+                val mask = if (unmasked.length > 6) maskDDMMYYYY else maskMMYYYY
+
+                for (m in mask.toCharArray()) {
+                    if (m != '#' && i < unmasked.length) {
+                        sb.append(m)
+                        continue
                     }
-                    if (cleanString.length > 4) {
-                        sb.append("/")
-                        sb.append(cleanString.substring(4)) // Ano
-                    }
-                } else {
-                    sb.append(cleanString) // Apenas parte do dia
+                    if (i >= unmasked.length) break
+                    sb.append(unmasked[i])
+                    i++
                 }
-                return sb.toString()
+
+                isFormatting = true
+                etValidadeProduto.setText(sb.toString())
+                etValidadeProduto.setSelection(sb.length) // Ajusta o cursor
+                isFormatting = false
+
+                // Validação para MM/AAAA ou DD/MM/AAAA
+                if (sb.length == maskMMYYYY.length || sb.length == maskDDMMYYYY.length) {
+                    if (sb.length == maskMMYYYY.length) { // MM/AAAA
+                        val mes = sb.substring(0, 2).toIntOrNull()
+                        val ano = sb.substring(3, 7).toIntOrNull()
+
+                        if (mes == null || mes !in 1..12) {
+                            etValidadeProduto.error = "Mês inválido! Insira um valor entre 01 e 12."
+                        } else if (ano == null || ano.toString().length != 4) {
+                            etValidadeProduto.error = "Ano inválido! Insira um ano com 4 dígitos."
+                        } else {
+                            etValidadeProduto.error = null // Limpa o erro se for válido
+                        }
+                    } else if (sb.length == maskDDMMYYYY.length) { // DD/MM/AAAA
+                        val dia = sb.substring(0, 2).toIntOrNull()
+                        val mes = sb.substring(3, 5).toIntOrNull()
+                        val ano = sb.substring(6, 10).toIntOrNull()
+
+                        if (dia == null || dia !in 1..31) {
+                            etValidadeProduto.error = "Dia inválido! Insira um valor entre 01 e 31."
+                        } else if (mes == null || mes !in 1..12) {
+                            etValidadeProduto.error = "Mês inválido! Insira um valor entre 01 e 12."
+                        } else if (ano == null || ano.toString().length != 4) {
+                            etValidadeProduto.error = "Ano inválido! Insira um ano com 4 dígitos."
+                        } else {
+                            etValidadeProduto.error = null // Limpa o erro se for válido
+                        }
+                    }
+                }
             }
         })
 
+        etValidadeProduto.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private fun salvarProduto() {
@@ -366,6 +370,14 @@ class CadastrarProdutoActivity : AppCompatActivity() {
 
     private fun showToast(mensagem: String) {
         Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun hideKeyboard() {
+        val view = currentFocus
+        if (view != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 
     private fun handleOnBackPressed() {
