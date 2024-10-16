@@ -62,7 +62,7 @@
     <string name="relatorio_quantidade">Quantidade: %d</string>
     <string name="relatorio_horario">Hora: %s</string>
     <string name="cadastrar">Cadastrar</string>
-    <string name="novoUsuario">novoUsuario</string>
+    <string name="novoUsuario">Novo Usuario</string>
     <string name="digite_seu_numero">Digite Seu Numero</string>
     <string name="emailCadastro">Email</string>
     <string name="numero">Numero</string>
@@ -107,5 +107,6 @@
     <string name="carregando">Editando</string>
     <string name="categoria">Categoria</string>
     <string name="selecione_a_categoria" />
+    <string name="logo_usuario">Logo_usuario</string>
 
 </resources>

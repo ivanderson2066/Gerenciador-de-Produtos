@@ -16,13 +16,13 @@ class RegistroUsuario(private val listaDeUsuarios: MutableList<UsuarioCadastroOb
         senhaRepetidaEditText: EditText,
     ) {
         val email: String = emailEditText.text.toString()
-        val numero = numeroEditText.text.toString().toIntOrNull()
         val senha = senhaEditText.text.toString()
         val senhaRepetida = senhaRepetidaEditText.text.toString()
+        val numero = numeroEditText.text.toString()  // Mantenha como String
 
-        if (email.isNotEmpty() && numero != null && senha.isNotEmpty() && senha == senhaRepetida) {
+        if (email.isNotEmpty() && senha.isNotEmpty() && senha == senhaRepetida) {
 
-            val novoUsuario = UsuarioCadastroObj(email, numero, senha, senhaRepetida)
+            val novoUsuario = UsuarioCadastroObj(email, numero)
 
             // Adiciona o novo usuário à lista local
             listaDeUsuarios.add(novoUsuario)
