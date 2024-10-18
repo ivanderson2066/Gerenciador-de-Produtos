@@ -15,7 +15,6 @@ import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
-import java.util.Locale
 
 class ProdutoAdapter(
     private var listaProdutos: List<Produto>,
