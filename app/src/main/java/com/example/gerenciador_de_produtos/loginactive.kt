@@ -34,6 +34,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var registerText: TextView
     private lateinit var mAuth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var loadingDialog: AlertDialog
     private val RC_SIGN_IN = 9001
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,13 +83,35 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLoadingDialog(message: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
+        val loadingText = dialogView.findViewById<TextView>(R.id.loading_text) // Certifique-se de que o ID esteja correto
+        loadingText.text = message // Define a mensagem no TextView
+
+        loadingDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+    }
+
+    private fun hideLoadingDialog() {
+        if (::loadingDialog.isInitialized && loadingDialog.isShowing) {
+            loadingDialog.dismiss()
+        }
+    }
+
     private fun login() {
         val email = emailInput.text.toString()
         val password = passwordInput.text.toString()
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
+            showLoadingDialog("Autenticando, por favor aguarde...") // Mensagem personalizada
+
             mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
+                    hideLoadingDialog() // Esconde a tela de carregamento
+
                     if (task.isSuccessful) {
                         val currentUser = mAuth.currentUser
                         if (currentUser != null) {

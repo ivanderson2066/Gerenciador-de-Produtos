@@ -45,4 +45,5 @@
     <item name="editTextTextPassword" type="id" />
     <item name="editTextTextPasswordRepeat" type="id" />
     <item name="button_cadastro" type="id" />
+    <item name="loading_text" type="id" />
 </resources>
