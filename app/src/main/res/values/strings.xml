@@ -14,7 +14,7 @@
     <string name="reportar">TODO</string>
     <string name="nome_do_produto">Nome do Produto</string>
     <string name="quantidade_0">Quantidade: 0</string>
-    <string name="pre_o_r_0_00">Preço: R$0.00</string>
+    <string name="pre_o_r_0_00">Preço: 0.00</string>
     <string name="categoria_sem_categoria">Categoria: Sem categoria</string>
     <string name="validade_sem_validade">Validade: Sem validade</string>
     <string name="logo" />
