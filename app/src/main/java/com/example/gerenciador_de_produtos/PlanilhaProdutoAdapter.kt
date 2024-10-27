@@ -56,7 +56,7 @@ class PlanilhaProdutoAdapter(
         holder.quantidadeTextView.text = "Quantidade: ${produto.quantidade}"
         // Modificando a formatação do preço
         val preco: String = produto.preco // Certifique-se que preco é um String
-        holder.precoTextView.text = "Preço: R$ $preco" // Mostra diretamente, pois já é String
+        holder.precoTextView.text = "Preço: $preco" // Mostra diretamente, pois já é String
 
         holder.categoriaTextView.text = "Categoria: ${produto.categoria.ifEmpty { "Sem Categoria" }}"
 
