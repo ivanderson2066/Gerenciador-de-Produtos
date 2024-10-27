@@ -77,11 +77,10 @@
 
             <TextView
                 android:id="@+id/categoria_produto"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:maxLines="2"
-                android:text="@string/categoria_sem_categoria"
+                android:text="@string/categoria_produto"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />

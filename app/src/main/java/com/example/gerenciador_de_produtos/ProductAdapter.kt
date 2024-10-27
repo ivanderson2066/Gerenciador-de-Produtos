@@ -37,6 +37,7 @@ class ProdutoAdapter(
         val validadeTextView: TextView = itemView.findViewById(R.id.validade_produto)
         val entradaButton: Button = itemView.findViewById(R.id.entrada_button) // Botão de entrada
         val saidaButton: Button = itemView.findViewById(R.id.saida_button) // Botão de saída
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProdutoViewHolder {
@@ -52,9 +53,12 @@ class ProdutoAdapter(
         holder.nomeTextView.text = produto.nome
         holder.quantidadeTextView.text = "Quantidade: ${produto.quantidade}"
 
+
+
+
         // Modificando a formatação do preço
         val preco: String = produto.preco // Certifique-se que preco é um String
-        holder.precoTextView.text = "Preço: R$ $preco" // Mostra diretamente, pois já é String
+        holder.precoTextView.text = "Preço: $preco" // Mostra diretamente, pois já é String
 
         // Verifica se a categoria é vazia ou nula
         if (produto.categoria.isEmpty()) {
@@ -161,6 +165,7 @@ class ProdutoAdapter(
             true
         }
     }
+
 
     // Método para definir o listener de clique longo
     fun setOnItemLongClickListener(listener: OnItemLongClickListener) {

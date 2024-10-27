@@ -10,6 +10,6 @@ data class Produto(
     val validade: String? = null,
     val userId: String = "",
     var estoqueMaximo: Int = 0, // Adiciona o estoque máximo
-    var vendas: Int = 0
-
+    var vendas: Int = 0,
+    val descricao: String = ""
 )

@@ -13,6 +13,7 @@
     <string name="buscar">TODO</string>
     <string name="reportar">TODO</string>
     <string name="nome_do_produto">Nome do Produto</string>
+    <string name="descricao_produto">Descrição do Produto</string>
     <string name="quantidade_0">Quantidade: 0</string>
     <string name="pre_o_r_0_00">Preço: R$0.00</string>
     <string name="categoria_sem_categoria">Categoria: Sem categoria</string>
@@ -108,5 +109,6 @@
     <string name="categoria">Categoria</string>
     <string name="selecione_a_categoria" />
     <string name="logo_usuario">Logo_usuario</string>
-
+    Categoria: Sem categoria
+    <string name="categoria_produto">Categoria: Sem categoria</string>
 </resources>

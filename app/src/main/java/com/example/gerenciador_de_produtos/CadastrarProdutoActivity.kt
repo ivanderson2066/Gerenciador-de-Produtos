@@ -341,7 +341,7 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         val spinnerCategoria = findViewById<Spinner>(R.id.spinner_categoria_produto)
         val categoria = spinnerCategoria.selectedItem.toString()
         val validade = findViewById<TextInputEditText>(R.id.et_validade_produto).text.toString()
-
+        val descricao = findViewById<TextInputEditText>(R.id.et_descricao_produto).text.toString() // Captura a descrição
         val categoriaFinal = if (categoria == "Selecione a categoria") "" else categoria
 
         // Validação para a data de validade
@@ -353,7 +353,7 @@ class CadastrarProdutoActivity : AppCompatActivity() {
         val validadeExibida = validade.ifEmpty { null }
 
         // Passa o preço como string diretamente
-        databaseHelper.adicionarProduto(nome, quantidade, precoString, categoriaFinal, validadeExibida) { sucesso, mensagem ->
+        databaseHelper.adicionarProduto(nome, quantidade, precoString, categoriaFinal, validadeExibida, descricao) { sucesso, mensagem ->
             if (sucesso) {
                 showToast("Produto salvo com sucesso!")
                 setResult(RESULT_OK)
