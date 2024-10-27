@@ -111,4 +111,6 @@
     <string name="logo_usuario">Logo_usuario</string>
     Categoria: Sem categoria
     <string name="categoria_produto">Categoria: Sem categoria</string>
+    <string name="preco">Preço</string>
+    <string name="digite_o_preco">Digite o preço</string>
 </resources>

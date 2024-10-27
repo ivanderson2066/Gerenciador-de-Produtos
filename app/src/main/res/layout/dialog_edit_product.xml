@@ -56,16 +56,36 @@
             android:layout_marginBottom="16dp"
             android:maxLength="10"
             android:imeOptions="actionDone"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/categoria"
+            android:text="@string/preco"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
+        <EditText
+            android:id="@+id/input_preco"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/digite_o_preco"
+            android:padding="12dp"
+            android:background="@drawable/borda"
+            android:inputType="numberDecimal"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"/>
         <!-- Spinner para selecionar a Categoria -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/categoria"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
         <Spinner
             android:id="@+id/spinner_categoria"
             android:layout_width="match_parent"

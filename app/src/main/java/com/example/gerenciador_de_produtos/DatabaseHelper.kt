@@ -271,7 +271,8 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
             "nomeMin" to nomeMin, // Inclui o campo nomeMin
             "validade" to (produto.validade ?: ""),
             "estoqueMaximo" to produto.estoqueMaximo,
-            "categoria" to produto.categoria // Incluindo o campo de categoria
+            "categoria" to produto.categoria, // Incluindo o campo de categoria
+            "preco" to produto.preco
         )
 
         db.collection("users").document(userId).collection("produtos").document(produto.id)

@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
 import com.example.gerenciadordeprodutos.R
+import java.text.NumberFormat
+import java.util.Locale
 
 class ProdutosActivity : AppCompatActivity() {
 
@@ -62,18 +64,60 @@ class ProdutosActivity : AppCompatActivity() {
         val inputNome: EditText = dialogView.findViewById(R.id.input_nome)
         val inputValidade: EditText = dialogView.findViewById(R.id.input_validade)
         val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
+        val inputPreco: EditText = dialogView.findViewById(R.id.input_preco)
         val spinnerCategoria: Spinner = dialogView.findViewById(R.id.spinner_categoria)
 
         // Preenche os campos com as informações atuais do produto
         inputNome.setText(produto.nome)
         inputValidade.setText(produto.validade)
         inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
+        inputPreco.setText(produto.preco)  // Preencher com o preço atual, formatado
 
-        // Adiciona o TextWatcher para formatar o campo de validade automaticamente e validar (MM/AAAA ou DD/MM/AAAA)
+        // Adiciona o TextWatcher para formatar o campo de preço
+        inputPreco.addTextChangedListener(object : TextWatcher {
+            private var isFormatting = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isFormatting) return
+
+                isFormatting = true
+                val originalString = s.toString()
+
+                // Remover todos os caracteres que não são dígitos
+                val cleanString = originalString.replace("\\D".toRegex(), "")
+
+                // Se a string limpa estiver vazia, resetar o campo
+                if (cleanString.isEmpty()) {
+                    inputPreco.setText("")
+                    isFormatting = false
+                    return
+                }
+
+                try {
+                    // Converter para um número e formatar como moeda
+                    val parsed = cleanString.toLong()
+                    val formattedString = NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(parsed / 100.0)
+
+                    // Atualizar o texto com a formatação
+                    inputPreco.setText(formattedString)
+                    inputPreco.setSelection(formattedString.length) // Manter o cursor no final
+                } catch (e: NumberFormatException) {
+                    inputPreco.setText("")
+                }
+
+                isFormatting = false
+            }
+        })
+
+        // Adiciona o TextWatcher para formatar e validar o campo de validade
         inputValidade.addTextChangedListener(object : TextWatcher {
             private var isUpdating = false
-            private val maskMMYYYY = "##/####"  // Formato MM/AAAA
-            private val maskDDMMYYYY = "##/##/####"  // Formato DD/MM/AAAA
+            private val maskMMYYYY = "##/####"
+            private val maskDDMMYYYY = "##/##/####"
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -99,27 +143,21 @@ class ProdutosActivity : AppCompatActivity() {
 
                 isUpdating = true
                 inputValidade.setText(sb.toString())
-                inputValidade.setSelection(sb.length)  // Ajusta a posição do cursor
+                inputValidade.setSelection(sb.length)
                 isUpdating = false
 
-                // Validação para MM/AAAA ou DD/MM/AAAA
                 if (sb.length == maskMMYYYY.length || sb.length == maskDDMMYYYY.length) {
-                    if (sb.length == maskMMYYYY.length) { // MM/AAAA
+                    if (sb.length == maskMMYYYY.length) {
                         val mes = sb.substring(0, 2).toIntOrNull()
                         val ano = sb.substring(3, 7).toIntOrNull()
-                        val dia = sb.substring(0, 2).toIntOrNull()
-
-                        if (dia == null || dia !in 1..31) {
-                            inputValidade.error = "Dia inválido! Insira um valor entre 01 e 31."
-                        }
-                    else if (mes == null || mes !in 1..12) {
+                        if (mes == null || mes !in 1..12) {
                             inputValidade.error = "Mês inválido! Insira um valor entre 01 e 12."
                         } else if (ano == null || ano.toString().length != 4) {
                             inputValidade.error = "Ano inválido! Insira um ano com 4 dígitos."
                         } else {
-                            inputValidade.error = null // Limpa o erro se for válido
+                            inputValidade.error = null
                         }
-                    } else if (sb.length == maskDDMMYYYY.length) { // DD/MM/AAAA
+                    } else if (sb.length == maskDDMMYYYY.length) {
                         val dia = sb.substring(0, 2).toIntOrNull()
                         val mes = sb.substring(3, 5).toIntOrNull()
                         val ano = sb.substring(6, 10).toIntOrNull()
@@ -131,7 +169,7 @@ class ProdutosActivity : AppCompatActivity() {
                         } else if (ano == null || ano.toString().length != 4) {
                             inputValidade.error = "Ano inválido! Insira um ano com 4 dígitos."
                         } else {
-                            inputValidade.error = null // Limpa o erro se for válido
+                            inputValidade.error = null
                         }
                     }
                 }
@@ -166,18 +204,25 @@ class ProdutosActivity : AppCompatActivity() {
             val novoNome = inputNome.text.toString()
             val novaValidade = inputValidade.text.toString()
             val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
+
+            // Manter o preço formatado conforme digitado
+            val novoPreco = inputPreco.text.toString()  // Salvar o preço formatado como o usuário inseriu
             val novaCategoria = spinnerCategoria.selectedItem as String
 
             if (novaValidade.isNotEmpty() && !validarDataValidade(novaValidade)) {
                 Toast.makeText(this, "Data de validade inválida! Insira uma data no formato MM/AAAA ou DD/MM/AAAA.", Toast.LENGTH_SHORT).show()
             } else if (novoEstoqueMaximo == null || novoEstoqueMaximo < produto.quantidade) {
                 Toast.makeText(this, "O novo estoque máximo deve ser maior ou igual à quantidade atual!", Toast.LENGTH_SHORT).show()
-            } else {
+            } else if (novoPreco <= 0.toString()) {
+                Toast.makeText(this, "Preço inválido! Insira um valor válido.", Toast.LENGTH_SHORT).show()
+            }  else {
+                // Atualiza o produto no banco de dados
                 databaseHelper.atualizarProduto(
                     produto.copy(
                         nome = novoNome,
                         validade = novaValidade,
                         estoqueMaximo = novoEstoqueMaximo,
+                        preco = novoPreco,  // Salvar o novo preço como String formatada
                         categoria = novaCategoria
                     )
                 ) { sucesso ->
