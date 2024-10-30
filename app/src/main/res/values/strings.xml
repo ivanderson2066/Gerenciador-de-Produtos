@@ -118,4 +118,5 @@
     <string name="categoria_produto">Categoria: Sem categoria</string>
     <string name="preco">Preço</string>
     <string name="digite_o_preco">Digite o preço</string>
+    <string name="marca_do_produto">Marca do Produto</string>
 </resources>

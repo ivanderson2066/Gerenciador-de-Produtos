@@ -287,7 +287,7 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
     }
 
     // Adiciona um produto ao Firestore
-    fun adicionarProduto(nome: String, quantidade: Int, preco: String, categoria: String, validade: String?, descricao: String, callback: (Boolean, String?) -> Unit) {
+    fun adicionarProduto(nome: String, quantidade: Int, preco: String, categoria: String, validade: String?, descricao: String,marca: String, callback: (Boolean, String?) -> Unit) {
 
         val userId = auth.currentUser?.uid ?: return
 
@@ -311,6 +311,7 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
                         "id" to produtoId,
                         "nome" to nomeOriginal,
                         "nomeMin" to nomeMin,
+                        "marca" to marca,
                         "quantidade" to quantidade,
                         "preco" to preco,  // Salva como string formatada sem alterações
                         "categoria" to categoria,
