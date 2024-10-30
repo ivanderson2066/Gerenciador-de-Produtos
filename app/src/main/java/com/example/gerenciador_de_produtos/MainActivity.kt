@@ -26,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
 import com.example.gerenciadordeprodutos.R
@@ -55,8 +56,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         recyclerView = findViewById(R.id.product_recycler_view)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
-
+        recyclerView.layoutManager = LinearLayoutManager(this) // Exibe 1 item por linha
         noProductsText = findViewById(R.id.no_products_text)
         profileIcon = findViewById(R.id.profile_icon)
         pieChart = findViewById(R.id.piechart) // Inicializa o PieChart
@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showEntradaDialog(produto: Produto) {
+    fun showEntradaDialog(produto: Produto, onQuantidadeAtualizada: (Int) -> Unit) {
         val dialogView = layoutInflater.inflate(R.layout.entrad_saida_dialogo, null)
         val inputQuantidade: EditText = dialogView.findViewById(R.id.input_quantidade)
         val inputMotivo: EditText = dialogView.findViewById(R.id.input_motivo)
@@ -326,10 +326,9 @@ class MainActivity : AppCompatActivity() {
 
                     // Verifica se a nova quantidade ultrapassa o estoque máximo
                     if (novaQuantidade > produto.estoqueMaximo) {
-                        // Atualiza o estoque máximo para a nova quantidade
                         databaseHelper.atualizarEstoqueMaximo(produto.id, novaQuantidade) { sucesso ->
                             if (sucesso) {
-                                produto.estoqueMaximo = novaQuantidade // Atualiza o objeto localmente
+                                produto.estoqueMaximo = novaQuantidade
                                 Toast.makeText(this, "Estoque máximo atualizado com sucesso!", Toast.LENGTH_SHORT).show()
                             } else {
                                 Toast.makeText(this, "Erro ao atualizar estoque máximo!", Toast.LENGTH_SHORT).show()
@@ -337,15 +336,20 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
+                    // Atualiza a quantidade do produto no banco de dados
                     databaseHelper.atualizarQuantidadeProduto(produto.id, novaQuantidade) { sucesso ->
                         if (sucesso) {
+                            // Adiciona o registro de entrada ao relatório
                             databaseHelper.adicionarRelatorio(produto.nome, "Entrada", quantidadeEntrada, motivo) { relatorioSucesso ->
                                 if (relatorioSucesso) {
                                     Toast.makeText(this, "Entrada registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    // Chama o callback para atualizar o BottomSheet com a nova quantidade
+                                    onQuantidadeAtualizada(novaQuantidade)
+                                    carregarProdutos() // Atualiza a lista de produtos
+
                                 } else {
                                     Toast.makeText(this, "Erro ao registrar entrada!", Toast.LENGTH_SHORT).show()
                                 }
-                                carregarProdutos() // Atualiza a lista de produtos
                             }
                         } else {
                             Toast.makeText(this, "Erro ao atualizar quantidade!", Toast.LENGTH_SHORT).show()
@@ -361,7 +365,7 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    fun showSaidaDialog(produto: Produto) {
+    fun showSaidaDialog(produto: Produto, onQuantidadeAtualizada: (Int) -> Unit) {
         val dialogView = layoutInflater.inflate(R.layout.entrad_saida_dialogo, null)
         val inputQuantidade: EditText = dialogView.findViewById(R.id.input_quantidade)
         val inputMotivo: EditText = dialogView.findViewById(R.id.input_motivo)
@@ -379,15 +383,19 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this, "Quantidade insuficiente!", Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
+
                     databaseHelper.atualizarQuantidadeProduto(produto.id, novaQuantidade) { sucesso ->
                         if (sucesso) {
+                            // Adiciona o registro de saída ao relatório
                             databaseHelper.adicionarRelatorio(produto.nome, "Saída", quantidadeSaida, motivo) { relatorioSucesso ->
                                 if (relatorioSucesso) {
                                     Toast.makeText(this, "Saída registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    // Chama o callback para atualizar o BottomSheet com a nova quantidade
+                                    onQuantidadeAtualizada(novaQuantidade)
+                                    carregarProdutos() // Atualiza a lista de produtos
                                 } else {
                                     Toast.makeText(this, "Erro ao registrar saída!", Toast.LENGTH_SHORT).show()
                                 }
-                                carregarProdutos() // Atualiza a lista de produtos
                             }
                         } else {
                             Toast.makeText(this, "Erro ao atualizar quantidade!", Toast.LENGTH_SHORT).show()

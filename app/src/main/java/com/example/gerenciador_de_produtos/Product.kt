@@ -3,7 +3,7 @@ package com.example.gerenciador_de_produtos
 // Produto atualizado para Firestore
 data class Produto(
     val nome: String = "",
-    val quantidade: Int = 0,
+    var quantidade: Int = 0,
     var id: String = "",
     val preco: String = "",
     val categoria: String = "",

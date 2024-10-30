@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation (libs.material)
     implementation (libs.core.ktx.v1100)
-    implementation (libs.itextpdf.itext7.core) // Versão do iText
+    implementation (libs.itextpdf.itext7.core)
     implementation(libs.play.services.auth)
     implementation (libs.material.v190)
     implementation(libs.firebase.database.ktx)

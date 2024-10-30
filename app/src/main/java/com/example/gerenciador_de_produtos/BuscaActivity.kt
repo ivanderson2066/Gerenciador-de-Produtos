@@ -279,32 +279,45 @@ class BuscaActivity : AppCompatActivity() {
         }
     }
 
-    fun showSaidaDialog(produto: Produto, categoria: String) {
+    fun showEntradaDialog(produto: Produto, onQuantidadeAtualizada: (Int) -> Unit) {
         val dialogView = layoutInflater.inflate(R.layout.entrad_saida_dialogo, null)
         val inputQuantidade: EditText = dialogView.findViewById(R.id.input_quantidade)
         val inputMotivo: EditText = dialogView.findViewById(R.id.input_motivo)
 
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Saída de Produto - $categoria")
+            .setTitle("Entrada de Produto")
             .setView(dialogView)
             .setPositiveButton("Confirmar") { _, _ ->
-                val quantidadeSaida = inputQuantidade.text.toString().toIntOrNull()
+                val quantidadeEntrada = inputQuantidade.text.toString().toIntOrNull()
                 val motivo = inputMotivo.text.toString()
 
-                if (quantidadeSaida != null && quantidadeSaida > 0) {
-                    val novaQuantidade = produto.quantidade - quantidadeSaida
-                    if (novaQuantidade < 0) {
-                        Toast.makeText(this, "Quantidade insuficiente!", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
+                if (quantidadeEntrada != null && quantidadeEntrada > 0) {
+                    val novaQuantidade = produto.quantidade + quantidadeEntrada
+
+                    // Verifica se a nova quantidade ultrapassa o estoque máximo
+                    if (novaQuantidade > produto.estoqueMaximo) {
+                        databaseHelper.atualizarEstoqueMaximo(produto.id, novaQuantidade) { sucesso ->
+                            if (sucesso) {
+                                produto.estoqueMaximo = novaQuantidade
+                                Toast.makeText(this, "Estoque máximo atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this, "Erro ao atualizar estoque máximo!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
+
+                    // Atualiza a quantidade do produto no banco de dados
                     databaseHelper.atualizarQuantidadeProduto(produto.id, novaQuantidade) { sucesso ->
                         if (sucesso) {
-                            databaseHelper.adicionarRelatorio(produto.nome, "Saída", quantidadeSaida, motivo) { relatorioSucesso ->
+                            // Adiciona o registro de entrada ao relatório
+                            databaseHelper.adicionarRelatorio(produto.nome, "Entrada", quantidadeEntrada, motivo) { relatorioSucesso ->
                                 if (relatorioSucesso) {
-                                    Toast.makeText(this, "Saída registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "Entrada registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    // Chama o callback para atualizar o BottomSheet com a nova quantidade
+                                    onQuantidadeAtualizada(novaQuantidade)
                                     atualizarTela()
                                 } else {
-                                    Toast.makeText(this, "Erro ao registrar saída!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "Erro ao registrar entrada!", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         } else {
@@ -321,40 +334,36 @@ class BuscaActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    fun showEntradaDialog(produto: Produto) {
+    fun showSaidaDialog(produto: Produto, onQuantidadeAtualizada: (Int) -> Unit) {
         val dialogView = layoutInflater.inflate(R.layout.entrad_saida_dialogo, null)
         val inputQuantidade: EditText = dialogView.findViewById(R.id.input_quantidade)
         val inputMotivo: EditText = dialogView.findViewById(R.id.input_motivo)
 
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Entrada de Produto - ${produto.nome}")
+            .setTitle("Saída de Produto")
             .setView(dialogView)
             .setPositiveButton("Confirmar") { _, _ ->
-                val quantidadeEntrada = inputQuantidade.text.toString().toIntOrNull()
+                val quantidadeSaida = inputQuantidade.text.toString().toIntOrNull()
                 val motivo = inputMotivo.text.toString()
 
-                if (quantidadeEntrada != null && quantidadeEntrada > 0) {
-                    val novaQuantidade = produto.quantidade + quantidadeEntrada
-
-                    if (novaQuantidade > produto.estoqueMaximo) {
-                        databaseHelper.atualizarEstoqueMaximo(produto.id, novaQuantidade) { sucesso ->
-                            if (sucesso) {
-                                produto.estoqueMaximo = novaQuantidade
-                                Toast.makeText(this, "Estoque máximo atualizado com sucesso!", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(this, "Erro ao atualizar estoque máximo!", Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                if (quantidadeSaida != null && quantidadeSaida > 0) {
+                    val novaQuantidade = produto.quantidade - quantidadeSaida
+                    if (novaQuantidade < 0) {
+                        Toast.makeText(this, "Quantidade insuficiente!", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
                     }
 
                     databaseHelper.atualizarQuantidadeProduto(produto.id, novaQuantidade) { sucesso ->
                         if (sucesso) {
-                            databaseHelper.adicionarRelatorio(produto.nome, "Entrada", quantidadeEntrada, motivo) { relatorioSucesso ->
+                            // Adiciona o registro de saída ao relatório
+                            databaseHelper.adicionarRelatorio(produto.nome, "Saída", quantidadeSaida, motivo) { relatorioSucesso ->
                                 if (relatorioSucesso) {
-                                    Toast.makeText(this, "Entrada registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "Saída registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    // Chama o callback para atualizar o BottomSheet com a nova quantidade
+                                    onQuantidadeAtualizada(novaQuantidade)
                                     atualizarTela()
                                 } else {
-                                    Toast.makeText(this, "Erro ao registrar entrada!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "Erro ao registrar saída!", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         } else {

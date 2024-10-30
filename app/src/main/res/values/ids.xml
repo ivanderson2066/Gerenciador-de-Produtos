@@ -46,4 +46,12 @@
     <item name="editTextTextPasswordRepeat" type="id" />
     <item name="button_cadastro" type="id" />
     <item name="loading_text" type="id" />
+    <item name="categoria_produto_popup" type="id" />
+    <item name="preco_produto_popup" type="id" />
+    <item name="nome_produto_popup" type="id" />
+    <item name="quantidade_produto_popup" type="id" />
+    <item name="validade_produto_popup" type="id" />
+    <item name="entrada_button_popup" type="id" />
+    <item name="saida_button_popup" type="id" />
+    <item name="card_view" type="id" />
 </resources>

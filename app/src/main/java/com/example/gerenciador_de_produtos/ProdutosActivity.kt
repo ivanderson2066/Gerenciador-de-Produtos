@@ -22,7 +22,7 @@ import java.util.Locale
 class ProdutosActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: PlanilhaProdutoAdapter
+    private lateinit var adapter: ProdutoAdapter
     private val databaseHelper = DatabaseHelper()
     private lateinit var categorias: MutableList<Categoria> // Defina categorias como uma lista de Categoria
 
@@ -40,26 +40,25 @@ class ProdutosActivity : AppCompatActivity() {
 
     private fun carregarProdutos() {
         databaseHelper.obterTodosProdutos { listaProdutos ->
-            if (listaProdutos.isNotEmpty()) {
-                adapter = PlanilhaProdutoAdapter(
-                    listaProdutos,
-                    onEntradaClick = { produto -> showEntradaDialog(produto) },
-                    onSaidaClick = { produto -> showSaidaDialog(produto) },
-                    activity = this
-                )
-                recyclerView.adapter = adapter
+            if (listaProdutos.isEmpty()) {
+                recyclerView.visibility = View.GONE
             } else {
-                Toast.makeText(this, "Nenhum produto encontrado.", Toast.LENGTH_SHORT).show()
+                recyclerView.visibility = View.VISIBLE
+                adapter = ProdutoAdapter(listaProdutos, this)
+                recyclerView.adapter = adapter
+
+
             }
         }
     }
+
     private fun carregarCategorias() {
         databaseHelper.obterCategorias { listaCategorias ->
             categorias = listaCategorias.toMutableList() // Certifique-se de que isso seja uma MutableList
             // Se precisar atualizar o Adapter em algum lugar, faça isso aqui
         }
     }
-    private fun showEditDialog(produto: Produto) {
+    fun showEditDialog(produto: Produto) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_product, null)
         val inputNome: EditText = dialogView.findViewById(R.id.input_nome)
         val inputValidade: EditText = dialogView.findViewById(R.id.input_validade)
@@ -238,7 +237,7 @@ class ProdutosActivity : AppCompatActivity() {
         }
     }
 
-    private fun showEditStockDialog(produto: Produto) {
+    fun showEditStockDialog(produto: Produto) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_stock, null)
         val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
 
@@ -299,7 +298,7 @@ class ProdutosActivity : AppCompatActivity() {
         popup.show()
     }
 
-    private fun excluirProduto(produto: Produto) {
+    fun excluirProduto(produto: Produto) {
         AlertDialog.Builder(this)
             .setTitle("Excluir Produto")
             .setMessage("Tem certeza que deseja excluir este produto?")
@@ -322,7 +321,7 @@ class ProdutosActivity : AppCompatActivity() {
         onBackPressedDispatcher.onBackPressed()
     }
 
-    private fun showEntradaDialog(produto: Produto) {
+    fun showEntradaDialog(produto: Produto, onQuantidadeAtualizada: (Int) -> Unit) {
         val dialogView = layoutInflater.inflate(R.layout.entrad_saida_dialogo, null)
         val inputQuantidade: EditText = dialogView.findViewById(R.id.input_quantidade)
         val inputMotivo: EditText = dialogView.findViewById(R.id.input_motivo)
@@ -339,10 +338,9 @@ class ProdutosActivity : AppCompatActivity() {
 
                     // Verifica se a nova quantidade ultrapassa o estoque máximo
                     if (novaQuantidade > produto.estoqueMaximo) {
-                        // Atualiza o estoque máximo para a nova quantidade
                         databaseHelper.atualizarEstoqueMaximo(produto.id, novaQuantidade) { sucesso ->
                             if (sucesso) {
-                                produto.estoqueMaximo = novaQuantidade // Atualiza o objeto localmente
+                                produto.estoqueMaximo = novaQuantidade
                                 Toast.makeText(this, "Estoque máximo atualizado com sucesso!", Toast.LENGTH_SHORT).show()
                             } else {
                                 Toast.makeText(this, "Erro ao atualizar estoque máximo!", Toast.LENGTH_SHORT).show()
@@ -350,15 +348,20 @@ class ProdutosActivity : AppCompatActivity() {
                         }
                     }
 
+                    // Atualiza a quantidade do produto no banco de dados
                     databaseHelper.atualizarQuantidadeProduto(produto.id, novaQuantidade) { sucesso ->
                         if (sucesso) {
+                            // Adiciona o registro de entrada ao relatório
                             databaseHelper.adicionarRelatorio(produto.nome, "Entrada", quantidadeEntrada, motivo) { relatorioSucesso ->
                                 if (relatorioSucesso) {
                                     Toast.makeText(this, "Entrada registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    // Chama o callback para atualizar o BottomSheet com a nova quantidade
+                                    onQuantidadeAtualizada(novaQuantidade)
+                                    carregarProdutos() // Atualiza a lista de produtos
+
                                 } else {
                                     Toast.makeText(this, "Erro ao registrar entrada!", Toast.LENGTH_SHORT).show()
                                 }
-                                carregarProdutos() // Atualiza a lista de produtos
                             }
                         } else {
                             Toast.makeText(this, "Erro ao atualizar quantidade!", Toast.LENGTH_SHORT).show()
@@ -374,8 +377,7 @@ class ProdutosActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
-    private fun showSaidaDialog(produto: Produto) {
+    fun showSaidaDialog(produto: Produto, onQuantidadeAtualizada: (Int) -> Unit) {
         val dialogView = layoutInflater.inflate(R.layout.entrad_saida_dialogo, null)
         val inputQuantidade: EditText = dialogView.findViewById(R.id.input_quantidade)
         val inputMotivo: EditText = dialogView.findViewById(R.id.input_motivo)
@@ -393,15 +395,19 @@ class ProdutosActivity : AppCompatActivity() {
                         Toast.makeText(this, "Quantidade insuficiente!", Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
+
                     databaseHelper.atualizarQuantidadeProduto(produto.id, novaQuantidade) { sucesso ->
                         if (sucesso) {
+                            // Adiciona o registro de saída ao relatório
                             databaseHelper.adicionarRelatorio(produto.nome, "Saída", quantidadeSaida, motivo) { relatorioSucesso ->
                                 if (relatorioSucesso) {
                                     Toast.makeText(this, "Saída registrada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    // Chama o callback para atualizar o BottomSheet com a nova quantidade
+                                    onQuantidadeAtualizada(novaQuantidade)
+                                    carregarProdutos() // Atualiza a lista de produtos
                                 } else {
                                     Toast.makeText(this, "Erro ao registrar saída!", Toast.LENGTH_SHORT).show()
                                 }
-                                carregarProdutos() // Atualiza a lista de produtos
                             }
                         } else {
                             Toast.makeText(this, "Erro ao atualizar quantidade!", Toast.LENGTH_SHORT).show()

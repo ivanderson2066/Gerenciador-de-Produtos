@@ -1,3 +1,4 @@
+
 package com.example.gerenciador_de_produtos
 
 import android.annotation.SuppressLint
@@ -12,9 +13,11 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class ProdutoAdapter(
     private var listaProdutos: List<Produto>,
@@ -34,9 +37,6 @@ class ProdutoAdapter(
         val quantidadeTextView: TextView = itemView.findViewById(R.id.quantidade_produto)
         val precoTextView: TextView = itemView.findViewById(R.id.preco_produto)
         val categoriaTextView: TextView = itemView.findViewById(R.id.categoria_produto)
-        val validadeTextView: TextView = itemView.findViewById(R.id.validade_produto)
-        val entradaButton: Button = itemView.findViewById(R.id.entrada_button) // Botão de entrada
-        val saidaButton: Button = itemView.findViewById(R.id.saida_button) // Botão de saída
 
     }
 
@@ -68,13 +68,7 @@ class ProdutoAdapter(
             holder.categoriaTextView.text = "Categoria: ${produto.categoria}"  // Define o texto da categoria
         }
 
-        // Exibe ou esconde o campo de validade
-        if (produto.validade.isNullOrEmpty()) {
-            holder.validadeTextView.visibility = View.GONE
-        } else {
-            holder.validadeTextView.visibility = View.VISIBLE
-            holder.validadeTextView.text = "Validade: ${produto.validade}"
-        }
+
 
         // Calcula os limites de 70% e 50% do estoque máximo
         val limite70Porcento = produto.estoqueMaximo * 0.70
@@ -106,26 +100,10 @@ class ProdutoAdapter(
             }
         }
 
-        // Configura o clique no botão de Entrada para abrir o diálogo de entrada
-        holder.entradaButton.setOnClickListener {
-            when (context) {
-                is MainActivity -> context.showEntradaDialog(produto) // Chama o diálogo de entrada na MainActivity
-                is BuscaActivity -> context.showEntradaDialog(produto) // Chama o diálogo de entrada na BuscaActivity
-            }
+        // Clique no card para abrir o BottomSheet
+        holder.itemView.setOnClickListener {
+            mostrarBottomSheet(produto)
         }
-
-        // Configura o clique no botão de Saída para abrir o diálogo de saída
-        holder.saidaButton.setOnClickListener {
-            when (context) {
-                is MainActivity -> context.showSaidaDialog(produto) // Chama o diálogo de saída na MainActivity
-                is BuscaActivity -> {
-                    // Passa a categoria junto com o produto
-                    val categoriaDoProduto = produto.categoria
-                    context.showSaidaDialog(produto, categoriaDoProduto)
-                }
-            }
-        }
-
         // Adiciona o listener de clique longo para exibir o PopupMenu
         holder.itemView.setOnLongClickListener { view ->
             val popup = PopupMenu(context, view)
@@ -140,6 +118,8 @@ class ProdutoAdapter(
                         when (context) {
                             is MainActivity -> context.showEditDialog(produto)
                             is BuscaActivity -> context.showEditDialog(produto)
+                            is ProdutosActivity -> context.showEditDialog(produto)
+
                         }
                         true
                     }
@@ -147,6 +127,8 @@ class ProdutoAdapter(
                         when (context) {
                             is MainActivity -> context.excluirProduto(produto)
                             is BuscaActivity -> context.excluirProduto(produto)
+                            is ProdutosActivity -> context.excluirProduto(produto)
+
                         }
                         true
                     }
@@ -154,6 +136,8 @@ class ProdutoAdapter(
                         when (context) {
                             is MainActivity -> context.showEditStockDialog(produto)
                             is BuscaActivity -> context.showEditStockDialog(produto)
+                            is ProdutosActivity -> context.showEditStockDialog(produto)
+
                         }
                         true
                     }
@@ -175,6 +159,12 @@ class ProdutoAdapter(
     // Retorna o tamanho da lista de produtos
     override fun getItemCount(): Int {
         return listaProdutos.size
+    }
+    private fun mostrarBottomSheet(produto: Produto) {
+        val bottomSheetFragment = ProdutoBottomSheetFragment(produto)
+        if (context is AppCompatActivity) {
+            bottomSheetFragment.show(context.supportFragmentManager, bottomSheetFragment.tag)
+        }
     }
 
     // Método para enviar a notificação de estoque baixo
