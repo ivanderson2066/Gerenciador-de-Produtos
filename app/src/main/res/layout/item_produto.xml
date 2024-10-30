@@ -18,7 +18,6 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- Nome do produto -->
         <TextView
             android:id="@+id/nome_produto"
             android:layout_width="0dp"
@@ -28,12 +27,11 @@
             android:text="Nome do Produto"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            app:layout_constraintEnd_toStartOf="@+id/gif_50"
+            app:layout_constraintEnd_toStartOf="@+id/preco_produto"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Categoria do produto -->
         <TextView
             android:id="@+id/categoria_produto"
             android:layout_width="wrap_content"
@@ -45,7 +43,6 @@
             app:layout_constraintTop_toBottomOf="@id/nome_produto"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Preço do produto -->
         <TextView
             android:id="@+id/preco_produto"
             android:layout_width="wrap_content"
@@ -55,10 +52,8 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"
             app:layout_constraintTop_toTopOf="@id/nome_produto"
-            app:layout_constraintStart_toEndOf="@id/gif_75"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Quantidade do produto -->
         <TextView
             android:id="@+id/quantidade_produto"
             android:layout_width="wrap_content"
@@ -70,9 +65,6 @@
             app:layout_constraintTop_toBottomOf="@id/preco_produto"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Imagem 50% -->
-
-        <!-- Imagem 75% -->
         <ImageView
             android:id="@+id/gif_50"
             android:layout_width="42dp"
@@ -81,10 +73,10 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/quantidade_produto"
             app:layout_constraintEnd_toStartOf="@id/gif_75"
+            app:layout_constraintStart_toEndOf="@id/categoria_produto"
+            app:layout_constraintTop_toTopOf="@id/categoria_produto"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@id/nome_produto"
-            app:layout_constraintTop_toTopOf="@id/nome_produto"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.5" />
 
         <ImageView
             android:id="@+id/gif_75"
@@ -93,11 +85,11 @@
             android:src="@drawable/ic_notification"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/quantidade_produto"
-            app:layout_constraintEnd_toStartOf="@id/preco_produto"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toStartOf="@id/quantidade_produto"
             app:layout_constraintStart_toEndOf="@id/gif_50"
-            app:layout_constraintTop_toTopOf="@id/nome_produto"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toTopOf="@id/categoria_produto"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintVertical_bias="0.5" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
