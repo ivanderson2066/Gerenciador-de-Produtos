@@ -58,14 +58,14 @@ class ProdutoAdapter(
 
         // Modificando a formatação do preço
         val preco: String = produto.preco // Certifique-se que preco é um String
-        holder.precoTextView.text = "Preço: $preco" // Mostra diretamente, pois já é String
+        holder.precoTextView.text = "$preco" // Mostra diretamente, pois já é String
 
         // Verifica se a categoria é vazia ou nula
         if (produto.categoria.isEmpty()) {
             holder.categoriaTextView.visibility = View.GONE  // Esconde o campo de categoria
         } else {
             holder.categoriaTextView.visibility = View.VISIBLE  // Exibe o campo de categoria
-            holder.categoriaTextView.text = "Categoria: ${produto.categoria}"  // Define o texto da categoria
+            holder.categoriaTextView.text = "${produto.categoria}"  // Define o texto da categoria
         }
 
 
