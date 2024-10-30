@@ -9,7 +9,6 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -17,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciadordeprodutos.R
-import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class ProdutoAdapter(
     private var listaProdutos: List<Produto>,
@@ -56,16 +54,17 @@ class ProdutoAdapter(
 
 
 
+
         // Modificando a formatação do preço
         val preco: String = produto.preco // Certifique-se que preco é um String
-        holder.precoTextView.text = "$preco" // Mostra diretamente, pois já é String
+        holder.precoTextView.text = preco // Mostra diretamente, pois já é String
 
         // Verifica se a categoria é vazia ou nula
         if (produto.categoria.isEmpty()) {
             holder.categoriaTextView.visibility = View.GONE  // Esconde o campo de categoria
         } else {
             holder.categoriaTextView.visibility = View.VISIBLE  // Exibe o campo de categoria
-            holder.categoriaTextView.text = "${produto.categoria}"  // Define o texto da categoria
+            holder.categoriaTextView.text = produto.categoria  // Define o texto da categoria
         }
 
 

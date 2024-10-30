@@ -21,6 +21,7 @@ class ProdutoBottomSheetFragment(private val produto: Produto) : BottomSheetDial
         val categoriaProdutoPopup: TextView = bottomSheetView.findViewById(R.id.categoria_produto_popup)
         val precoProdutoPopup: TextView = bottomSheetView.findViewById(R.id.preco_produto_popup)
         val quantidadeProdutoPopup: TextView = bottomSheetView.findViewById(R.id.quantidade_produto_popup)
+        val descricaoProdutoPopup: TextView = bottomSheetView.findViewById(R.id.et_descricao_produto)
         val validadeProdutoPopup: TextView = bottomSheetView.findViewById(R.id.validade_produto_popup)
         val entradaButtonPopup: Button = bottomSheetView.findViewById(R.id.entrada_button_popup)
         val saidaButtonPopup: Button = bottomSheetView.findViewById(R.id.saida_button_popup)

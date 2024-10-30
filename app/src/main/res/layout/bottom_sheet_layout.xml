@@ -60,8 +60,17 @@
         android:textSize="16sp"
         android:fontFamily="@font/poppins_regular"
         android:textColor="@android:color/black"
+        android:paddingBottom="8dp" />
+    <!-- Validade do Produto -->
+    <TextView
+        android:id="@+id/et_descricao_produto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Descrição:"
+        android:textSize="16sp"
+        android:fontFamily="@font/poppins_regular"
+        android:textColor="@android:color/black"
         android:paddingBottom="16dp" />
-
     <!-- Botões de Entrada e Saída -->
     <LinearLayout
         android:layout_width="match_parent"
