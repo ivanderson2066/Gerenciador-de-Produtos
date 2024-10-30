@@ -78,11 +78,11 @@ class ProdutoBottomSheetFragment(private val produto: Produto) : BottomSheetDial
 
     ) {
         nomeProduto.text = produto.nome
-        categoriaProduto.text = "Categoria: ${produto.categoria}"
-        precoProduto.text = "Preço: ${produto.preco}"
-        quantidadeProduto.text = "Quantidade: ${produto.quantidade}"
-        validadeProduto.text = "Validade: ${produto.validade ?: "Não Informada"}"
-        descricaoProduto.text = "Descrição: ${produto.descricao}"
+        categoriaProduto.text = getString(R.string.categoria_produto2, produto.categoria)
+        precoProduto.text = getString(R.string.preco_produto, produto.preco)
+        quantidadeProduto.text = getString(R.string.quantidade_produto, produto.quantidade)
+        validadeProduto.text = getString(R.string.validade_produto, produto.validade ?: "Não Informada")
+        descricaoProduto.text = getString(R.string.descricao_produto2, produto.descricao)
 
     }
 }

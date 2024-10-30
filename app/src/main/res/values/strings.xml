@@ -1,4 +1,9 @@
 <resources>
+    <string name="categoria_produto2">Categoria: %1$s</string>
+    <string name="preco_produto">Preço: %1$s</string>
+    <string name="quantidade_produto">Quantidade: %1$d</string>
+    <string name="validade_produto">Validade: %1$s</string>
+    <string name="descricao_produto2">Descrição: %1$s</string>
     <string name="app_name">Nox Estoque</string>
     <string name="relat_rios">Relatórios</string>
     <string name="busca">Busca</string>
