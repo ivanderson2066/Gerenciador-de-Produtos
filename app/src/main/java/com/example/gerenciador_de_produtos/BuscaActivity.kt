@@ -559,6 +559,8 @@ class BuscaActivity : AppCompatActivity() {
             } else if (novoPreco <= 0.toString()) {
                 Toast.makeText(this, "Preço inválido! Insira um valor válido.", Toast.LENGTH_SHORT).show()
             }  else {
+                val categoriaFinal = if (novaCategoria == "Selecione a categoria") produto.categoria else novaCategoria
+
                 // Atualiza o produto no banco de dados
                 databaseHelper.atualizarProduto(
                     produto.copy(
@@ -566,7 +568,7 @@ class BuscaActivity : AppCompatActivity() {
                         validade = novaValidade,
                         estoqueMaximo = novoEstoqueMaximo,
                         preco = novoPreco,  // Salvar o novo preço como String formatada
-                        categoria = novaCategoria,
+                        categoria = categoriaFinal,
                         descricao = novaDescricao,  // Salvar nova descrição
                         marca = novaMarca  // Salvar nova marca
                     )
