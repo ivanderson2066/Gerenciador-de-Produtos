@@ -35,7 +35,7 @@ class ProdutoAdapter(
         val quantidadeTextView: TextView = itemView.findViewById(R.id.quantidade_produto)
         val precoTextView: TextView = itemView.findViewById(R.id.preco_produto)
         val categoriaTextView: TextView = itemView.findViewById(R.id.categoria_produto)
-
+        val marcaTextView: TextView = itemView.findViewById(R.id.marca_produto)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProdutoViewHolder {
@@ -50,7 +50,14 @@ class ProdutoAdapter(
 
         holder.nomeTextView.text = produto.nome
         holder.quantidadeTextView.text = "Quantidade: ${produto.quantidade}"
+        // Verifica se a categoria é vazia ou nula
+        if (produto.marca.isEmpty()) {
+            holder.marcaTextView.visibility = View.GONE  // Esconde o campo de categoria
+        } else {
+            holder.marcaTextView.visibility = View.VISIBLE  // Exibe o campo de categoria
+            holder.marcaTextView.text = "Marca: ${produto.marca}"
 
+        }
 
 
 
@@ -82,7 +89,7 @@ class ProdutoAdapter(
             produto.quantidade > limite70Porcento -> {
                 // Se a quantidade for acima de 70%, esconder ambos os GIFs
                 gif50.visibility = View.GONE
-                gif75.visibility = View.GONE
+                gif75.visibility = View.INVISIBLE
             }
             produto.quantidade > limite50Porcento -> {
                 // Se a quantidade for entre 50% e 70%, mostrar o GIF para 50%

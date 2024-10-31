@@ -119,4 +119,10 @@
     <string name="preco">Preço</string>
     <string name="digite_o_preco">Digite o preço</string>
     <string name="marca_do_produto">Marca do Produto</string>
+    <string name="marca_produto">Marca: %s</string>
+    <string name="digite_a_marca_do_produto">Digite a marca do produto</string>
+    <string name="marca">Marca</string>
+    <string name="digite_a_descri_o">Digite a Descrição</string>
+    <string name="descri_o">Descrição</string>
+
 </resources>

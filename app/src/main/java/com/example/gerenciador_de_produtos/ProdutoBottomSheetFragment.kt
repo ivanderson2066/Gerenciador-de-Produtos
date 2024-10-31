@@ -21,45 +21,102 @@ class ProdutoBottomSheetFragment(private val produto: Produto) : BottomSheetDial
         val categoriaProdutoPopup: TextView = bottomSheetView.findViewById(R.id.categoria_produto_popup)
         val precoProdutoPopup: TextView = bottomSheetView.findViewById(R.id.preco_produto_popup)
         val quantidadeProdutoPopup: TextView = bottomSheetView.findViewById(R.id.quantidade_produto_popup)
+        val marcaProdutoPopup: TextView = bottomSheetView.findViewById(R.id.et_marca_produto)
         val validadeProdutoPopup: TextView = bottomSheetView.findViewById(R.id.validade_produto_popup)
         val entradaButtonPopup: Button = bottomSheetView.findViewById(R.id.entrada_button_popup)
         val saidaButtonPopup: Button = bottomSheetView.findViewById(R.id.saida_button_popup)
 
-        // Inicializa o conteúdo com os dados atuais do produto
-        atualizarConteudoProduto(nomeProdutoPopup, categoriaProdutoPopup, precoProdutoPopup, quantidadeProdutoPopup,validadeProdutoPopup,descricaoProduto)
+        // Initialize content with the current product data
+        atualizarConteudoProduto(
+            nomeProdutoPopup,
+            categoriaProdutoPopup,
+            marcaProdutoPopup,
+            precoProdutoPopup,
+            quantidadeProdutoPopup,
+            validadeProdutoPopup,
+            descricaoProduto
+        )
 
-        // Configura o clique no botão de Entrada
+        // Handle the 'Entrada' button click
         entradaButtonPopup.setOnClickListener {
             when (requireActivity()) {
                 is MainActivity -> (requireActivity() as MainActivity).showEntradaDialog(produto) { novaQuantidade ->
                     produto.quantidade = novaQuantidade
-                    atualizarConteudoProduto(nomeProdutoPopup, categoriaProdutoPopup, precoProdutoPopup, quantidadeProdutoPopup, descricaoProduto,validadeProdutoPopup)
+                    atualizarConteudoProduto(
+                        nomeProdutoPopup,
+                        categoriaProdutoPopup,
+                        marcaProdutoPopup,
+                        precoProdutoPopup,
+                        quantidadeProdutoPopup,
+                        validadeProdutoPopup,
+                        descricaoProduto
+                    )
                 }
                 is BuscaActivity -> (requireActivity() as BuscaActivity).showEntradaDialog(produto) { novaQuantidade ->
                     produto.quantidade = novaQuantidade
-                    atualizarConteudoProduto(nomeProdutoPopup, categoriaProdutoPopup, precoProdutoPopup, descricaoProduto, quantidadeProdutoPopup, validadeProdutoPopup)
+                    atualizarConteudoProduto(
+                        nomeProdutoPopup,
+                        categoriaProdutoPopup,
+                        marcaProdutoPopup,
+                        precoProdutoPopup,
+                        quantidadeProdutoPopup,
+                        validadeProdutoPopup,
+                        descricaoProduto
+                    )
                 }
                 is ProdutosActivity -> (requireActivity() as ProdutosActivity).showEntradaDialog(produto) { novaQuantidade ->
                     produto.quantidade = novaQuantidade
-                    atualizarConteudoProduto(nomeProdutoPopup, categoriaProdutoPopup, precoProdutoPopup, quantidadeProdutoPopup, descricaoProduto ,validadeProdutoPopup)
+                    atualizarConteudoProduto(
+                        nomeProdutoPopup,
+                        categoriaProdutoPopup,
+                        marcaProdutoPopup,
+                        precoProdutoPopup,
+                        quantidadeProdutoPopup,
+                        validadeProdutoPopup,
+                        descricaoProduto
+                    )
                 }
             }
         }
 
-        // Configura o clique no botão de Saída
+        // Handle the 'Saída' button click
         saidaButtonPopup.setOnClickListener {
             when (requireActivity()) {
                 is MainActivity -> (requireActivity() as MainActivity).showSaidaDialog(produto) { novaQuantidade ->
                     produto.quantidade = novaQuantidade
-                    atualizarConteudoProduto(nomeProdutoPopup, categoriaProdutoPopup, precoProdutoPopup, quantidadeProdutoPopup,descricaoProduto, validadeProdutoPopup)
+                    atualizarConteudoProduto(
+                        nomeProdutoPopup,
+                        categoriaProdutoPopup,
+                        marcaProdutoPopup,
+                        precoProdutoPopup,
+                        quantidadeProdutoPopup,
+                        validadeProdutoPopup,
+                        descricaoProduto
+                    )
                 }
                 is BuscaActivity -> (requireActivity() as BuscaActivity).showSaidaDialog(produto) { novaQuantidade ->
                     produto.quantidade = novaQuantidade
-                    atualizarConteudoProduto(nomeProdutoPopup, categoriaProdutoPopup,descricaoProduto, precoProdutoPopup, quantidadeProdutoPopup, validadeProdutoPopup)
+                    atualizarConteudoProduto(
+                        nomeProdutoPopup,
+                        categoriaProdutoPopup,
+                        marcaProdutoPopup,
+                        precoProdutoPopup,
+                        quantidadeProdutoPopup,
+                        validadeProdutoPopup,
+                        descricaoProduto
+                    )
                 }
                 is ProdutosActivity -> (requireActivity() as ProdutosActivity).showSaidaDialog(produto) { novaQuantidade ->
                     produto.quantidade = novaQuantidade
-                    atualizarConteudoProduto(nomeProdutoPopup, categoriaProdutoPopup, precoProdutoPopup, quantidadeProdutoPopup, validadeProdutoPopup,descricaoProduto)
+                    atualizarConteudoProduto(
+                        nomeProdutoPopup,
+                        categoriaProdutoPopup,
+                        marcaProdutoPopup,
+                        precoProdutoPopup,
+                        quantidadeProdutoPopup,
+                        validadeProdutoPopup,
+                        descricaoProduto
+                    )
                 }
             }
         }
@@ -67,22 +124,22 @@ class ProdutoBottomSheetFragment(private val produto: Produto) : BottomSheetDial
         return bottomSheetView
     }
 
-    // Método para atualizar o conteúdo do BottomSheet
+    // Method to update the content of the BottomSheet
     private fun atualizarConteudoProduto(
         nomeProduto: TextView,
         categoriaProduto: TextView,
+        marcaProduto: TextView,
         precoProduto: TextView,
         quantidadeProduto: TextView,
         validadeProduto: TextView,
         descricaoProduto: TextView
-
     ) {
         nomeProduto.text = produto.nome
         categoriaProduto.text = getString(R.string.categoria_produto2, produto.categoria)
+        marcaProduto.text = getString(R.string.marca_produto, produto.marca)
         precoProduto.text = getString(R.string.preco_produto, produto.preco)
         quantidadeProduto.text = getString(R.string.quantidade_produto, produto.quantidade)
         validadeProduto.text = getString(R.string.validade_produto, produto.validade ?: "Não Informada")
         descricaoProduto.text = getString(R.string.descricao_produto2, produto.descricao)
-
     }
 }

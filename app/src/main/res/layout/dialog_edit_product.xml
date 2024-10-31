@@ -34,7 +34,48 @@
             android:textSize="16sp"
             android:maxLength="30"
             android:layout_marginBottom="16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/marca"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
+        <EditText
+            android:id="@+id/marca_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/digite_a_marca_do_produto"
+            android:padding="12dp"
+            android:background="@drawable/borda"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:maxLength="30"
+            android:layout_marginBottom="16dp"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/descri_o"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/descricao_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/digite_a_descri_o"
+            android:padding="12dp"
+            android:background="@drawable/borda"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:maxLength="30"
+            android:layout_marginBottom="16dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

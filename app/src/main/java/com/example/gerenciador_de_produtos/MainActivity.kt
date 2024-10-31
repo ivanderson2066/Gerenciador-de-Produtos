@@ -25,7 +25,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
@@ -418,13 +417,16 @@ class MainActivity : AppCompatActivity() {
         val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
         val inputPreco: EditText = dialogView.findViewById(R.id.input_preco)
         val spinnerCategoria: Spinner = dialogView.findViewById(R.id.spinner_categoria)
+        val inputDescricao: EditText = dialogView.findViewById(R.id.descricao_input)  // Novo campo
+        val inputMarca: EditText = dialogView.findViewById(R.id.marca_input)  // Novo campo
 
         // Preenche os campos com as informações atuais do produto
         inputNome.setText(produto.nome)
         inputValidade.setText(produto.validade)
+        inputMarca.setText(produto.marca)
+        inputDescricao.setText(produto.descricao)
         inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
         inputPreco.setText(produto.preco)  // Preencher com o preço atual, formatado
-
         // Adiciona o TextWatcher para formatar o campo de preço
         inputPreco.addTextChangedListener(object : TextWatcher {
             private var isFormatting = false
@@ -556,7 +558,8 @@ class MainActivity : AppCompatActivity() {
             val novoNome = inputNome.text.toString()
             val novaValidade = inputValidade.text.toString()
             val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
-
+            val novaDescricao = inputDescricao.text.toString()  // Nova descrição
+            val novaMarca = inputMarca.text.toString()  // Nova marca
             // Manter o preço formatado conforme digitado
             val novoPreco = inputPreco.text.toString()  // Salvar o preço formatado como o usuário inseriu
             val novaCategoria = spinnerCategoria.selectedItem as String
@@ -575,7 +578,9 @@ class MainActivity : AppCompatActivity() {
                         validade = novaValidade,
                         estoqueMaximo = novoEstoqueMaximo,
                         preco = novoPreco,  // Salvar o novo preço como String formatada
-                        categoria = novaCategoria
+                        categoria = novaCategoria,
+                        descricao = novaDescricao,  // Salvar nova descrição
+                        marca = novaMarca  // Salvar nova marca
                     )
                 ) { sucesso ->
                     if (sucesso) {

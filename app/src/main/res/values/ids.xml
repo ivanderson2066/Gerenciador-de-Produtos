@@ -54,4 +54,5 @@
     <item name="entrada_button_popup" type="id" />
     <item name="saida_button_popup" type="id" />
     <item name="card_view" type="id" />
+    <item name="marca_produto" type="id" />
 </resources>

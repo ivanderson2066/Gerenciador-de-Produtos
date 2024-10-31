@@ -268,6 +268,8 @@ private fun verificarProdutosAssociados(categoriaNome: String, callback: (Boolea
         // Adiciona a categoria ao hashMap
         val produtoData = hashMapOf<String, Any>(
             "nome" to produto.nome,
+            "marca" to produto.marca,
+            "descricao" to produto.descricao,
             "nomeMin" to nomeMin, // Inclui o campo nomeMin
             "validade" to (produto.validade ?: ""),
             "estoqueMaximo" to produto.estoqueMaximo,
