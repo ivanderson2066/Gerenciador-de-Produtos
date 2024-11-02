@@ -6,7 +6,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gerenciadordeprodutos.databinding.ActivityTelaDeCadastroBinding // Corrigir a importação
+import com.example.gerenciadordeprodutos.databinding.ActivityTelaDeCadastroBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
@@ -15,35 +15,26 @@ class RegistroActivity : AppCompatActivity() {
 
     private val listaDeUsuarios = mutableListOf<UsuarioCadastroObj>()
     private lateinit var registroUsuario: RegistroUsuario
-    private lateinit var binding: ActivityTelaDeCadastroBinding // Classe de binding gerada
-    private lateinit var auth: FirebaseAuth // Firebase Auth
+    private lateinit var binding: ActivityTelaDeCadastroBinding
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTelaDeCadastroBinding.inflate(layoutInflater) // Inicializa o binding
-        setContentView(binding.root) // Define a view principal com o binding
+        binding = ActivityTelaDeCadastroBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Inicializa a classe de registro de usuário
         registroUsuario = RegistroUsuario(listaDeUsuarios)
-        auth = FirebaseAuth.getInstance() // Inicializa o Firebase Auth
+        auth = FirebaseAuth.getInstance()
 
-        // Configura o TextWatcher para formatar o número de telefone
         binding.editTextPhone.addTextChangedListener(object : TextWatcher {
             private var isFormatting = false
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Não faz nada antes da alteração
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Não faz nada enquanto o texto é alterado
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 if (isFormatting) return
                 isFormatting = true
 
-                // Formata o número de telefone e atualiza o campo
                 val formattedNumber = formatarNumeroTelefone(s.toString())
                 binding.editTextPhone.setText(formattedNumber)
                 binding.editTextPhone.setSelection(formattedNumber.length)
@@ -52,34 +43,22 @@ class RegistroActivity : AppCompatActivity() {
             }
         })
 
-        // Configura a ação do botão "Cadastrar"
         binding.buttonCadastro.setOnClickListener {
             val email = binding.editTextTextEmailAddress.text.toString()
             val numero = binding.editTextPhone.text.toString()
             val senha = binding.editTextTextPassword.text.toString()
             val senhaRepetida = binding.editTextTextPasswordRepeat.text.toString()
 
-            // Valida os campos antes de registrar o usuário
             if (validarCampos(email, numero, senha, senhaRepetida)) {
-                verificarEmailExistente(email) { existe ->
-                    if (existe) {
-                        // Exibe mensagem que o e-mail já está cadastrado
-                        binding.editTextTextEmailAddress.error = "E-mail já cadastrado"
-                    } else {
-                        // Prossegue com o registro do usuário
-                        registrarUsuario(email, senha) // Chama a nova função para registrar
-                    }
-                }
+                registrarUsuario(email, senha)
             }
         }
 
-        // Configura o botão de voltar
         binding.backArrrowPage.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed() // Melhor tratamento de navegação
+            onBackPressedDispatcher.onBackPressed()
         }
     }
 
-    // Função auxiliar para formatar o número de telefone
     private fun formatarNumeroTelefone(numero: String): String {
         val numerosSomente = numero.replace(Regex("\\D"), "")
         return when {
@@ -96,7 +75,6 @@ class RegistroActivity : AppCompatActivity() {
         }
     }
 
-    // Função para validar os campos de entrada
     private fun validarCampos(
         email: String, numero: String, senha: String, senhaRepetida: String
     ): Boolean {
@@ -123,29 +101,10 @@ class RegistroActivity : AppCompatActivity() {
         return true
     }
 
-    // Função para verificar se o e-mail já existe
-    private fun verificarEmailExistente(email: String, callback: (Boolean) -> Unit) {
-        // Verifica se o e-mail já está em uso
-        auth.fetchSignInMethodsForEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Se o resultado não estiver vazio, significa que o e-mail já está em uso
-                    val signInMethods = task.result?.signInMethods
-                    callback(signInMethods?.isNotEmpty() == true) // Retorna true se o e-mail já estiver cadastrado
-                } else {
-                    // Tratamento para falhas na verificação
-                    Toast.makeText(this, "Erro ao verificar e-mail: ${task.exception?.localizedMessage}", Toast.LENGTH_SHORT).show()
-                    callback(false) // Considera como não existente em caso de erro
-                }
-            }
-    }
-
-    // Função para registrar o usuário
     private fun registrarUsuario(email: String, senha: String) {
         auth.createUserWithEmailAndPassword(email, senha)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Registro bem-sucedido
                     Toast.makeText(this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show()
 
                     // Limpar os campos de entrada
