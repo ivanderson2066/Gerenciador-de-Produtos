@@ -27,7 +27,10 @@ android {
             )
         }
     }
-
+    // Habilitar o ViewBinding no Kotlin DSL
+    viewBinding {
+        enable = true
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -38,7 +41,6 @@ android {
     }
 }
 
-
 dependencies {
     // Dependências padrão do Android
     implementation(libs.androidx.core.ktx)
@@ -46,28 +48,31 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation (libs.eazegraph)
-    implementation (libs.library)
+
+    // Bibliotecas adicionais
+    implementation(libs.eazegraph) // Gráficos
+    implementation(libs.library)   // Biblioteca customizada
+
     // Firebase BoM para controle de versões centralizado
     implementation(platform(libs.firebase.bom))
-    implementation (libs.androidx.cardview)
+
     // Dependências do Firebase
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.analytics.ktx)
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.firebase.auth)
-    implementation (libs.material)
-    implementation (libs.core.ktx.v1100)
-    implementation (libs.itextpdf.itext7.core)
-    implementation(libs.play.services.auth)
-    implementation (libs.material.v190)
-    implementation(libs.firebase.database.ktx)
-    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.auth.ktx)       // Firebase Authentication
+    implementation(libs.firebase.analytics.ktx)  // Firebase Analytics
+    implementation(libs.firebase.firestore.ktx)  // Firestore
+    implementation(libs.firebase.database.ktx)   // Firebase Database
+    implementation(libs.firebase.storage.ktx)    // Firebase Storage
+
+    // Outras dependências úteis
+    implementation(libs.androidx.cardview)       // CardView para UI
+    implementation(libs.itextpdf.itext7.core)    // iText PDF Library
+    implementation(libs.play.services.auth)      // Google Play Services Auth
+    implementation(libs.squareup.picasso)        // Picasso para carregar imagens
+    implementation(libs.glide)                   // Glide para carregamento de imagens
+    annotationProcessor(libs.compiler)           // Processador de anotações para Glide (se necessário)
+
     // Dependências para testes
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation (libs.squareup.picasso)
-    implementation (libs.glide)
-    annotationProcessor (libs.compiler)
 }
