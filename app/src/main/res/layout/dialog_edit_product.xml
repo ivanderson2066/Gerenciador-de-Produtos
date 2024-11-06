@@ -77,8 +77,9 @@
             android:background="@drawable/borda"
             android:textColor="@android:color/black"
             android:textSize="16sp"
-            android:maxLength="40"
-            android:layout_marginBottom="16dp"/>
+            android:maxLength="100"
+            android:layout_marginBottom="16dp"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
