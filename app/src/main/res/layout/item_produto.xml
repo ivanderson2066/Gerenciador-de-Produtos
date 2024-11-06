@@ -43,18 +43,21 @@
             app:layout_constraintTop_toBottomOf="@id/nome_produto"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Marca do Produto -->
         <TextView
             android:id="@+id/marca_produto"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/poppins_regular"
             android:text="Marca"
             android:textColor="#8A8A8A"
             android:textSize="14sp"
             android:maxLines="2"
+            android:ellipsize="end"
             app:layout_constraintTop_toBottomOf="@id/categoria_produto"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/quantidade_produto"
+            app:layout_constraintHorizontal_bias="0.0" />
+
 
         <!-- Imagem gif_50 -->
         <ImageView
