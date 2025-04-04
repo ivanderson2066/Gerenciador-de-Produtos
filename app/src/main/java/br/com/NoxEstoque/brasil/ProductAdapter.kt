@@ -1,5 +1,5 @@
 
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -15,7 +15,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gerenciadordeprodutos.R
 
 class ProdutoAdapter(
     private var listaProdutos: List<Produto>,

@@ -1,4 +1,4 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import com.google.firebase.Timestamp
 

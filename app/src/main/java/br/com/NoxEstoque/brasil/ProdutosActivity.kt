@@ -1,4 +1,4 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import android.os.Bundle
 import android.text.Editable
@@ -13,8 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
-import com.example.gerenciadordeprodutos.R
+import br.com.NoxEstoque.brasil.CadastrarProdutoActivity.Utils.validarDataValidade
 import java.text.NumberFormat
 import java.util.Locale
 

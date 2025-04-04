@@ -1,11 +1,10 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gerenciadordeprodutos.R
 import com.google.firebase.Timestamp // Certifique-se de importar esta classe
 import java.text.SimpleDateFormat
 import java.util.*

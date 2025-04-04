@@ -7,12 +7,57 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:153484113221:android:8e7fff1ecca7d037917a2c",
+        "android_client_info": {
+          "package_name": "br.com.NoxEstoque.brasil"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "153484113221-3bee3rj2tqkv2kth1eg89q03dggm8lq5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.NoxEstoque.brasil",
+            "certificate_hash": "912acbe4ca75ea7e99f6793661d3fe1053790bbc"
+          }
+        },
+        {
+          "client_id": "153484113221-m1r88e1j11e9un8m9fv15ke5eu2dd5ve.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAICueREEBBqKjs842lsJND8ASzZVrT2Ks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "153484113221-m1r88e1j11e9un8m9fv15ke5eu2dd5ve.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:153484113221:android:3b96c5665457c0b1917a2c",
         "android_client_info": {
           "package_name": "com.example.gerenciadordeprodutos"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "153484113221-cu46gq7umndapvrd9uns5l9fd99hajd9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gerenciadordeprodutos",
+            "certificate_hash": "912acbe4ca75ea7e99f6793661d3fe1053790bbc"
+          }
+        },
         {
           "client_id": "153484113221-m1r88e1j11e9un8m9fv15ke5eu2dd5ve.apps.googleusercontent.com",
           "client_type": 3

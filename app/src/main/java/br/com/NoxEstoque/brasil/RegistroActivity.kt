@@ -1,4 +1,4 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,10 +6,10 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gerenciadordeprodutos.databinding.ActivityTelaDeCadastroBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import br.com.NoxEstoque.brasil.databinding.ActivityTelaDeCadastroBinding
 
 class RegistroActivity : AppCompatActivity() {
 

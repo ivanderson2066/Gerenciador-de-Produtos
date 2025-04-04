@@ -1,4 +1,4 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import com.example.gerenciadordeprodutos.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class ProdutoBottomSheetFragment(private val produto: Produto) : BottomSheetDialogFragment() {

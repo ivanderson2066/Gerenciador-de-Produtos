@@ -1,4 +1,4 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import android.content.Context
 import android.net.Uri
@@ -13,8 +13,7 @@ import com.google.android.material.textfield.TextInputEditText
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import androidx.activity.result.contract.ActivityResultContracts
-import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
-import com.example.gerenciadordeprodutos.R
+import br.com.NoxEstoque.brasil.CadastrarProdutoActivity.Utils.validarDataValidade
 import java.text.NumberFormat
 import java.util.Locale
 

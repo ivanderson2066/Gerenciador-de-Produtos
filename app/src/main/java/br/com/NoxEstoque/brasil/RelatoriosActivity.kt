@@ -1,4 +1,4 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
@@ -14,7 +14,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gerenciadordeprodutos.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.OutputStream
 import java.util.Calendar

@@ -1,281 +1,309 @@
-package com.example.gerenciador_de_produtos
+package br.com.NoxEstoque.brasil
 
-import android.net.Uri
+import android.annotation.SuppressLint
+import android.content.Intent
+import java.util.Locale
+import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.view.MenuItem
+import android.view.View
+import android.widget.Button
+import android.animation.ValueAnimator
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.SearchView
+import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.example.gerenciador_de_produtos.CadastrarProdutoActivity.Utils.validarDataValidade
-import com.example.gerenciadordeprodutos.R
-import com.google.android.material.textfield.TextInputEditText
+import br.com.NoxEstoque.brasil.CadastrarProdutoActivity.Utils.validarDataValidade
+import com.google.firebase.auth.FirebaseAuth
+import org.eazegraph.lib.charts.PieChart
+import org.eazegraph.lib.models.PieModel
 import java.text.NumberFormat
-import java.util.Locale
 
-class BuscaActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
-    private lateinit var recyclerViewCategorias: RecyclerView
-    private lateinit var recyclerViewProdutos: RecyclerView
-    private lateinit var searchView: SearchView
-    private lateinit var textViewCategorias: TextView
-    private lateinit var textViewProdutos: TextView
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: ProdutoAdapter
+    private lateinit var noProductsText: TextView
+    private lateinit var profileIcon: ImageView
     private val databaseHelper = DatabaseHelper()
-    private lateinit var dbHelper: DatabaseHelper
-    private lateinit var categoriaAdapter: CategoryAdapter
-    private lateinit var produtoAdapter: ProdutoAdapter
-    private var tipoBusca: String? = null
-    private var categoriaSelecionada: Categoria? = null
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var cadastrarProdutoLauncher: ActivityResultLauncher<Intent>
+    private var progressoSliceIndex: Int = -1 // Índice da fatia de progresso
+    private var restanteSliceIndex: Int = -1 // Índice da fatia restante
+    private lateinit var categorias: MutableList<Categoria> // Defina categorias como uma lista de Categoria
 
-    private var imageUri: Uri? = null
-    private var imageViewInDialog: ImageView? = null
-
-    private val imagePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let {
-                imageUri = it
-                imageViewInDialog?.let { imageView ->
-                    Glide.with(this)
-                        .load(it)
-                        .into(imageView)
-                    imageView.visibility = View.VISIBLE
-                }
-            }
-        }
+    // Declaração do PieChart
+    private lateinit var pieChart: PieChart
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activy_busca)
+        setContentView(R.layout.activity_main)
 
-        recyclerViewCategorias = findViewById(R.id.recyclerViewCategorias)
-        recyclerViewProdutos = findViewById(R.id.recyclerViewProdutos)
-        searchView = findViewById(R.id.searchView)
-        textViewCategorias = findViewById(R.id.textViewCategorias)
-        textViewProdutos = findViewById(R.id.textViewProdutos)
+        recyclerView = findViewById(R.id.product_recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this) // Exibe 1 item por linha
+        noProductsText = findViewById(R.id.no_products_text)
+        profileIcon = findViewById(R.id.profile_icon)
+        pieChart = findViewById(R.id.piechart) // Inicializa o PieChart
+        mAuth = FirebaseAuth.getInstance()
+        carregarCategorias()
 
-        textViewProdutos.visibility = View.GONE
-        recyclerViewProdutos.visibility = View.GONE
+        // Inicializa o launcher para o resultado da atividade de cadastro de produtos
+        cadastrarProdutoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                carregarProdutos() // Atualiza a lista de produtos
+            }
+        }
 
-        dbHelper = DatabaseHelper()
+        // Lógica de menu ao clicar na imagem de perfil
+        profileIcon.setOnClickListener {
+            showPopupMenu(it)
+        }
 
-        recyclerViewCategorias.layoutManager = LinearLayoutManager(this)
-        categoriaAdapter = CategoryAdapter(emptyList(), { categoria: Categoria ->
-            carregarProdutosPorCategoria(categoria)
-        }, { categoria: Categoria ->
-            mostrarOpcoesCategoria(categoria)
-        })
-        recyclerViewCategorias.adapter = categoriaAdapter
+        // Botão de Produtos para abrir a tela de produtos
+        findViewById<View>(R.id.produtos_button).setOnClickListener {
+            val intent = Intent(this, ProdutosActivity::class.java)
+            startActivity(intent)
+        }
+        findViewById<View>(R.id.pesquisa_button).setOnClickListener {
+            val intent = Intent(this, BuscaActivity::class.java)
+            startActivity(intent)
+        }
+        // Botão de Relatórios para abrir a tela de relatórios
+        findViewById<View>(R.id.relatorio_button).setOnClickListener {
+            val intent = Intent(this, RelatoriosActivity::class.java)
+            startActivity(intent)
+        }
 
-        val btnBack: ImageView = findViewById(R.id.btnBack)
-        btnBack.setOnClickListener {
-            if (recyclerViewProdutos.visibility == View.VISIBLE) {
-                mostrarCategorias()
+        carregarProdutos()
+
+        val buttonCadastrarProduto: Button = findViewById(R.id.new_product_button)
+        buttonCadastrarProduto.setOnClickListener {
+            val intent = Intent(this, CadastrarProdutoActivity::class.java)
+            cadastrarProdutoLauncher.launch(intent)
+        }
+    }
+    private fun carregarCategorias() {
+        databaseHelper.obterCategorias { listaCategorias ->
+            categorias = listaCategorias.toMutableList() // Certifique-se de que isso seja uma MutableList
+            // Se precisar atualizar o Adapter em algum lugar, faça isso aqui
+        }
+    }
+    private fun showPopupMenu(view: View) {
+        val popup = PopupMenu(this, view)
+        popup.menuInflater.inflate(R.menu.profile_menu, popup.menu)
+
+        // Estilizando o item de logout com SpannableString
+        val logoutItem: MenuItem = popup.menu.findItem(R.id.menu_logout)
+        val spannableTitle = SpannableString(logoutItem.title)
+        spannableTitle.setSpan(ForegroundColorSpan(Color.RED), 0, spannableTitle.length, 0)
+        logoutItem.title = spannableTitle
+
+        // Definindo comportamento ao clicar nos itens do menu
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_logout -> {
+                    mAuth.signOut()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        popup.show()
+    }
+
+    @SuppressLint("StringFormatInvalid")
+    private fun carregarProdutos() {
+        databaseHelper.obterTodosProdutos { listaProdutos ->
+            if (listaProdutos.isEmpty()) {
+                noProductsText.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+                // Exibe o gráfico zerado (0% progresso e 100% restante)
+                exibirGraficoVazio()
             } else {
-                finish()
-            }
-        }
+                noProductsText.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+                adapter = ProdutoAdapter(listaProdutos, this)
+                recyclerView.adapter = adapter
+                // Recalcula o gráfico com base na nova lista de produtos
+                exibirGrafico(listaProdutos)
 
-        recyclerViewProdutos.layoutManager = LinearLayoutManager(this)
-        produtoAdapter = ProdutoAdapter(emptyList(), this)
-        recyclerViewProdutos.adapter = produtoAdapter
-
-        atualizarCategorias()
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                if (!query.isNullOrEmpty()) {
-                    esconderCategorias()
-                    buscarProdutos(query)
-                }
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (!newText.isNullOrEmpty()) {
-                    esconderCategorias()
-                    buscarProdutos(newText)
-                } else {
-                    mostrarCategorias()
-                }
-                return true
-            }
-        })
-    }
-
-    private fun mostrarDialogoEditarCategoria(categoria: Categoria) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Editar Categoria")
-
-        val viewInflated = layoutInflater.inflate(R.layout.dialog_edit_categoria, null)
-        val editTextNome = viewInflated.findViewById<TextInputEditText>(R.id.input_nome_categoria)
-        imageViewInDialog = viewInflated.findViewById(R.id.image_preview)
-        val buttonEscolherImagem = viewInflated.findViewById<Button>(R.id.button_escolher_imagem)
-        val buttonConfirmar = viewInflated.findViewById<Button>(R.id.button_confirmar)
-        val textCancelar = viewInflated.findViewById<TextView>(R.id.text_cancelar)
-
-        editTextNome.setText(categoria.nome)
-        Glide.with(this)
-            .load(categoria.imagemUrl)
-            .into(imageViewInDialog!!)
-        imageViewInDialog!!.visibility = View.VISIBLE
-
-        imageUri = null
-
-        buttonEscolherImagem.setOnClickListener {
-            escolherImagem()
-        }
-
-        builder.setView(viewInflated)
-
-        val dialogInstance = builder.create()
-
-        buttonConfirmar.setOnClickListener {
-            val novoNome = editTextNome.text.toString().trim()
-
-            if (novoNome.isEmpty()) {
-                Toast.makeText(this, "O nome da categoria não pode ser vazio.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Verificação de duplicidade (ignora maiúsculas/minúsculas) para garantir que o nome não exista em outra categoria
-            dbHelper.obterCategorias { categorias ->
-                val existeDuplicata = categorias.any { it.nome.equals(novoNome, ignoreCase = true) && it.id != categoria.id }
-
-                if (existeDuplicata) {
-                    Toast.makeText(this, "Essa categoria já existe! Escolha outro nome.", Toast.LENGTH_SHORT).show()
-                    return@obterCategorias
-                }
-
-                val frameLayout = FrameLayout(this) // Cria um FrameLayout temporário
-                val view = layoutInflater.inflate(R.layout.dialog_loading, frameLayout, false) // Infla o layout com o FrameLayout como root
-
-                val loadingDialog = AlertDialog.Builder(this)
-                    .setView(view) // Usa a view inflada
-                    .setCancelable(false)
-                    .create()
-
-                loadingDialog.show()
-
-                if (imageUri != null) {
-                    dbHelper.editarCategoriaImagem(categoria.id, imageUri!!, categoria.imagemUrl) { sucessoImagem, _ ->
-                        if (sucessoImagem) {
-                            dbHelper.editarCategoriaNomeEImagem(categoria.id, novoNome, imageUri!!) { sucesso ->
-                                loadingDialog.dismiss()
-                                if (sucesso) {
-                                    atualizarCategorias()
-                                    Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
-                                    dialogInstance.dismiss()
-                                } else {
-                                    Toast.makeText(this, "Erro ao editar a categoria.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        } else {
-                            loadingDialog.dismiss()
-                            Toast.makeText(this, "Erro ao fazer o upload da imagem.", Toast.LENGTH_SHORT).show()
-                        }
+                // Configura o clique longo em cada item da lista de produtos
+                adapter.setOnItemLongClickListener(object : ProdutoAdapter.OnItemLongClickListener {
+                    override fun onItemLongClick(produto: Produto) {
+                        showProductOptionsMenu(produto) // Mostra o menu de opções do produto
                     }
-                } else {
-                    dbHelper.editarCategoriaNome(categoria.id, novoNome) { sucessoNome ->
-                        loadingDialog.dismiss()
-                        if (sucessoNome) {
-                            atualizarCategorias()
-                            Toast.makeText(this, "Categoria editada com sucesso!", Toast.LENGTH_SHORT).show()
-                            dialogInstance.dismiss()
-                        } else {
-                            Toast.makeText(this, "Erro ao editar o nome da categoria.", Toast.LENGTH_SHORT).show()
-                        }
+                })
+            }
+        }
+    }
+
+    private fun exibirGrafico(listaProdutos: List<Produto>) {
+        var quantidadeTotal = 0
+        var estoqueMaximoTotal = 0
+
+        for (produto in listaProdutos) {
+            quantidadeTotal += produto.quantidade
+            estoqueMaximoTotal += produto.estoqueMaximo
+        }
+
+        if (estoqueMaximoTotal > 0) {
+            val porcentagemProgresso = (quantidadeTotal.toFloat() / estoqueMaximoTotal.toFloat()) * 100
+            val restante = 100 - porcentagemProgresso
+
+            // Se os índices ainda não foram configurados ou o gráfico foi limpo, recria as fatias
+            if (progressoSliceIndex == -1 || restanteSliceIndex == -1) {
+                pieChart.clearChart()
+                pieChart.addPieSlice(PieModel("Restante", restante, Color.GRAY))
+                restanteSliceIndex = pieChart.data.size - 1
+
+                pieChart.addPieSlice(PieModel("Progresso Atual", porcentagemProgresso, Color.BLACK))
+                progressoSliceIndex = pieChart.data.size - 1
+
+                // Atualiza o TextView com a porcentagem inicial
+                val textViewPercentage = findViewById<TextView>(R.id.piechart_percentage)
+                textViewPercentage.text = String.format(Locale.getDefault(), "%.0f%%", porcentagemProgresso)
+            } else {
+                // Atualiza o gráfico com animação
+                animarAtualizacaoGrafico(porcentagemProgresso, restante)
+            }
+        } else {
+            // Se não houver estoque total, zera o gráfico (0% progresso e 100% restante)
+            exibirGraficoVazio()
+        }
+    }
+
+    private fun exibirGraficoVazio() {
+        // Limpa o gráfico e exibe 0% progresso e 100% restante
+        pieChart.clearChart()
+        pieChart.addPieSlice(PieModel("Restante", 100f, Color.GRAY))
+        pieChart.addPieSlice(PieModel("Progresso Atual", 0f, Color.BLACK))
+
+        restanteSliceIndex = pieChart.data.size - 2
+        progressoSliceIndex = pieChart.data.size - 1
+
+        val textViewPercentage = findViewById<TextView>(R.id.piechart_percentage)
+        textViewPercentage.text = "0%"
+    }
+
+
+    @SuppressLint("DefaultLocale") // Adicione esta importação se ainda não estiver presente
+
+    private fun animarAtualizacaoGrafico(novoProgresso: Float, novoRestante: Float) {
+        // Obtem os valores atuais das fatias
+        val valorAtualProgresso = pieChart.data[progressoSliceIndex].value
+        val valorAtualRestante = pieChart.data[restanteSliceIndex].value
+
+        // Cria animadores para animar de valores atuais para os novos
+        val animatorProgresso = ValueAnimator.ofFloat(valorAtualProgresso, novoProgresso)
+        val animatorRestante = ValueAnimator.ofFloat(valorAtualRestante, novoRestante)
+
+        animatorProgresso.duration = 1000 // Duração da animação em milissegundos
+        animatorRestante.duration = 1000
+
+        animatorProgresso.interpolator = AccelerateDecelerateInterpolator()
+        animatorRestante.interpolator = AccelerateDecelerateInterpolator()
+
+        animatorProgresso.addUpdateListener { animation ->
+            val animatedValue = animation.animatedValue as Float
+            pieChart.data[progressoSliceIndex].value = animatedValue
+            pieChart.update() // Atualiza o gráfico
+
+            // Atualiza o TextView com o valor da porcentagem
+            val porcentagemTexto = String.format(Locale.getDefault(), "%.0f%%", animatedValue)
+            val textViewPercentage = findViewById<TextView>(R.id.piechart_percentage)
+            textViewPercentage.text = porcentagemTexto
+        }
+
+        animatorRestante.addUpdateListener { animation ->
+            val animatedValue = animation.animatedValue as Float
+            pieChart.data[restanteSliceIndex].value = animatedValue
+            pieChart.update() // Atualiza o gráfico
+        }
+
+        animatorProgresso.start()
+        animatorRestante.start()
+    }
+
+
+    // Método para mostrar o menu de opções do produto
+    fun showProductOptionsMenu(produto: Produto) {
+        val popup = PopupMenu(this, recyclerView)
+        popup.menuInflater.inflate(R.menu.product_menu, popup.menu)
+
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_editar -> {
+                    showEditDialog(produto) // Chama o método de edição
+                    true
+                }
+                R.id.menu_excluir -> {
+                    excluirProduto(produto) // Chama o método de exclusão
+                    true
+                }
+                R.id.menu_estoque_maximo -> {
+                    showEditStockDialog(produto) // Chama o método para editar estoque máximo
+                    true
+                }
+                else -> false
+            }
+        }
+
+        popup.show()
+    }
+
+    fun showEditStockDialog(produto: Produto) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_stock, null)
+        val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
+
+        inputEstoqueMaximo.setText(produto.estoqueMaximo.toString()) // Preenche o campo com o estoque máximo atual
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Editar Estoque Máximo")
+            .setView(dialogView)
+            .setPositiveButton("Salvar", null) // Definido como nulo para configurar manualmente depois
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.show()
+
+        // Configura o botão "Salvar" para manter o diálogo aberto se houver erro
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
+
+            if (novoEstoqueMaximo == null) {
+                Toast.makeText(this, "Por favor, insira um valor válido.", Toast.LENGTH_SHORT).show()
+            } else if (novoEstoqueMaximo < produto.quantidade) {
+                Toast.makeText(this, "O estoque máximo não pode ser menor que a quantidade atual!", Toast.LENGTH_SHORT).show()
+            } else {
+                // Atualiza o estoque máximo
+                databaseHelper.atualizarEstoqueMaximo(produto.id, novoEstoqueMaximo) { sucesso ->
+                    if (sucesso) {
+                        Toast.makeText(this, "Estoque máximo atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss() // Fecha o diálogo após a atualização bem-sucedida
+                        carregarProdutos() // Atualiza a lista de produtos
+                    } else {
+                        Toast.makeText(this, "Erro ao atualizar estoque máximo!", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-        }
-
-        textCancelar.setOnClickListener {
-            dialogInstance.dismiss()
-        }
-
-        dialogInstance.show()
-    }
-
-    private fun escolherImagem() {
-        imagePickerLauncher.launch("image/*")
-    }
-
-    private fun mostrarOpcoesCategoria(categoria: Categoria) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Escolha uma opção")
-        builder.setItems(arrayOf("Editar", "Excluir")) { _, which ->
-            when (which) {
-                0 -> mostrarDialogoEditarCategoria(categoria)
-                1 -> mostrarDialogoExcluirCategoria(categoria)
-            }
-        }
-        builder.show()
-    }
-
-    private fun carregarProdutosPorCategoria(categoria: Categoria) {
-        categoriaSelecionada = categoria // Armazena a categoria selecionada
-        dbHelper.obterProdutosPorCategoria(categoria.nome) { produtos ->
-            produtoAdapter = ProdutoAdapter(produtos, this)
-            recyclerViewProdutos.adapter = produtoAdapter
-
-            tipoBusca = "categoria"
-
-            textViewProdutos.visibility = View.VISIBLE
-            recyclerViewProdutos.visibility = View.VISIBLE
-            textViewCategorias.visibility = View.GONE
-            recyclerViewCategorias.visibility = View.GONE
-        }
-    }
-
-    private fun buscarProdutos(nome: String) {
-        dbHelper.obterProdutosPorNome(nome) { produtos ->
-            produtoAdapter = ProdutoAdapter(produtos, this)
-            recyclerViewProdutos.adapter = produtoAdapter
-
-            tipoBusca = "nome"
-
-            textViewProdutos.visibility = View.VISIBLE
-            recyclerViewProdutos.visibility = View.VISIBLE
-            textViewCategorias.visibility = View.GONE
-            recyclerViewCategorias.visibility = View.GONE
-        }
-    }
-
-    private fun esconderCategorias() {
-        textViewCategorias.visibility = View.GONE
-        recyclerViewCategorias.visibility = View.GONE
-    }
-
-    private fun mostrarCategorias() {
-        categoriaSelecionada = null // Limpa a categoria selecionada
-        tipoBusca = null // Limpa o tipo de busca
-        textViewCategorias.visibility = View.VISIBLE
-        recyclerViewCategorias.visibility = View.VISIBLE
-        textViewProdutos.visibility = View.GONE
-        recyclerViewProdutos.visibility = View.GONE
-    }
-
-    private fun atualizarCategorias() {
-        dbHelper.obterCategorias { categorias ->
-            categoriaAdapter = CategoryAdapter(categorias, { categoria: Categoria ->
-                carregarProdutosPorCategoria(categoria)
-            }, { categoria: Categoria ->
-                mostrarOpcoesCategoria(categoria)
-            })
-            recyclerViewCategorias.adapter = categoriaAdapter
         }
     }
 
@@ -315,7 +343,8 @@ class BuscaActivity : AppCompatActivity() {
                                     Toast.makeText(this, "Entrada registrada com sucesso!", Toast.LENGTH_SHORT).show()
                                     // Chama o callback para atualizar o BottomSheet com a nova quantidade
                                     onQuantidadeAtualizada(novaQuantidade)
-                                    atualizarTela()
+                                    carregarProdutos() // Atualiza a lista de produtos
+
                                 } else {
                                     Toast.makeText(this, "Erro ao registrar entrada!", Toast.LENGTH_SHORT).show()
                                 }
@@ -361,7 +390,7 @@ class BuscaActivity : AppCompatActivity() {
                                     Toast.makeText(this, "Saída registrada com sucesso!", Toast.LENGTH_SHORT).show()
                                     // Chama o callback para atualizar o BottomSheet com a nova quantidade
                                     onQuantidadeAtualizada(novaQuantidade)
-                                    atualizarTela()
+                                    carregarProdutos() // Atualiza a lista de produtos
                                 } else {
                                     Toast.makeText(this, "Erro ao registrar saída!", Toast.LENGTH_SHORT).show()
                                 }
@@ -380,24 +409,6 @@ class BuscaActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun atualizarTela() {
-        if (recyclerViewProdutos.visibility == View.VISIBLE) {
-            when (tipoBusca) {
-                "nome" -> {
-                    if (searchView.query.isNotEmpty()) {
-                        buscarProdutos(searchView.query.toString())
-                    }
-                }
-                "categoria" -> {
-                    categoriaSelecionada?.let {
-                        carregarProdutosPorCategoria(it)
-                    }
-                }
-            }
-        } else {
-            atualizarCategorias()
-        }
-    }
     fun showEditDialog(produto: Produto) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_product, null)
         val inputNome: EditText = dialogView.findViewById(R.id.input_nome)
@@ -576,45 +587,9 @@ class BuscaActivity : AppCompatActivity() {
                     if (sucesso) {
                         Toast.makeText(this, "Produto atualizado com sucesso!", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
-                        atualizarTela()
+                        carregarProdutos()
                     } else {
                         Toast.makeText(this, "Erro ao atualizar produto!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-    }
-
-    fun showEditStockDialog(produto: Produto) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_stock, null)
-        val inputEstoqueMaximo: EditText = dialogView.findViewById(R.id.input_estoque_maximo)
-
-        inputEstoqueMaximo.setText(produto.estoqueMaximo.toString())
-
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Editar Estoque Máximo")
-            .setView(dialogView)
-            .setPositiveButton("Salvar", null)
-            .setNegativeButton("Cancelar", null)
-            .create()
-
-        dialog.show()
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            val novoEstoqueMaximo = inputEstoqueMaximo.text.toString().toIntOrNull()
-
-            if (novoEstoqueMaximo == null) {
-                Toast.makeText(this, "Por favor, insira um valor válido.", Toast.LENGTH_SHORT).show()
-            } else if (novoEstoqueMaximo < produto.quantidade) {
-                Toast.makeText(this, "O estoque máximo não pode ser menor que a quantidade atual!", Toast.LENGTH_SHORT).show()
-            } else {
-                databaseHelper.atualizarEstoqueMaximo(produto.id, novoEstoqueMaximo) { sucesso ->
-                    if (sucesso) {
-                        Toast.makeText(this, "Estoque máximo atualizado com sucesso!", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-                        atualizarTela()
-                    } else {
-                        Toast.makeText(this, "Erro ao atualizar estoque máximo!", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -626,11 +601,11 @@ class BuscaActivity : AppCompatActivity() {
             .setTitle("Excluir Produto")
             .setMessage("Tem certeza que deseja excluir este produto?")
             .setPositiveButton("Sim") { _, _ ->
-                // Passando também o nome do produto para o método
+                // Chama a função para excluir o produto
                 databaseHelper.excluirProduto(produto.id, produto.nome) { sucesso ->
                     if (sucesso) {
                         Toast.makeText(this, "Produto excluído com sucesso!", Toast.LENGTH_SHORT).show()
-                        atualizarTela() // Atualiza a lista de produtos
+                        carregarProdutos() // Atualiza a lista de produtos após exclusão
                     } else {
                         Toast.makeText(this, "Erro ao excluir produto!", Toast.LENGTH_SHORT).show()
                     }
@@ -640,23 +615,9 @@ class BuscaActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun mostrarDialogoExcluirCategoria(categoria: Categoria) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Excluir Categoria")
-        builder.setMessage("Tem certeza de que deseja excluir a categoria '${categoria.nome}'?")
-
-        builder.setPositiveButton("Sim") { _, _ ->
-            dbHelper.excluirCategoria(categoria.id, categoria.imagemUrl, categoria.nome) { sucesso ->
-                if (sucesso) {
-                    atualizarCategorias()
-                    Toast.makeText(this, "Categoria excluída com sucesso!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Erro ao excluir a categoria. Pode haver produtos associados.", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        builder.setNegativeButton("Não") { dialog, _ -> dialog.dismiss() }
-        builder.show()
+    // Método para excluir o produto
+    override fun onResume() {
+        super.onResume()
+        carregarProdutos() // Recarrega a lista ao retornar para a tela
     }
 }

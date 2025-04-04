@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gerenciadordeprodutos"
+    namespace = "br.com.NoxEstoque.brasil"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.gerenciadordeprodutos"
+        applicationId = "br.com.NoxEstoque.brasil"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

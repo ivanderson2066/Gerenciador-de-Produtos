@@ -15,7 +15,7 @@
 
 
     <application
-        android:name="com.example.gerenciador_de_produtos.MyApp"
+        android:name="br.com.NoxEstoque.brasil.MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -33,7 +33,7 @@
 
         <!-- Declaração da LoginActivity como a atividade inicial -->
         <activity
-            android:name="com.example.gerenciador_de_produtos.LoginActivity"
+            android:name="br.com.NoxEstoque.brasil.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,24 +43,24 @@
 
         <!-- Declaração da MainActivity -->
         <activity
-            android:name="com.example.gerenciador_de_produtos.MainActivity"
+            android:name="br.com.NoxEstoque.brasil.MainActivity"
             android:exported="true" />
 
         <!-- Declaração da CadastrarProdutoActivity -->
         <activity
-            android:name="com.example.gerenciador_de_produtos.CadastrarProdutoActivity"
+            android:name="br.com.NoxEstoque.brasil.CadastrarProdutoActivity"
             android:exported="true" />
         <activity
-            android:name="com.example.gerenciador_de_produtos.ProdutosActivity"
+            android:name="br.com.NoxEstoque.brasil.ProdutosActivity"
             android:exported="true" />
         <activity
-            android:name="com.example.gerenciador_de_produtos.BuscaActivity"
+            android:name="br.com.NoxEstoque.brasil.BuscaActivity"
             android:exported="true" />
         <activity
-            android:name="com.example.gerenciador_de_produtos.RelatoriosActivity"
+            android:name="br.com.NoxEstoque.brasil.RelatoriosActivity"
             android:exported="true" />
         <activity
-            android:name="com.example.gerenciador_de_produtos.RegistroActivity"
+            android:name="br.com.NoxEstoque.brasil.RegistroActivity"
             android:exported="true" />
 
 
